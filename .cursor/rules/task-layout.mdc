@@ -1,0 +1,20 @@
+---
+description: Segue o layout dos arquivos tasks/prd-*/N_task.md ao implementar uma tarefa
+alwaysApply: true
+---
+
+# Layout da tarefa
+
+Quando o trabalho for uma tarefa em `tasks/prd-*/[num]_task.md`, siga o arquivo nessa ordem. Não escreva código antes de ler.
+
+1. Bloco `<critical>`: leia `prd.md` e `techspec.md` da mesma pasta.
+2. Visão Geral: fique nesse escopo. Não antecipe tela, banco ou regra que a visão diz que ainda não entram.
+3. Skills: aplique só o que a seção declarar.
+4. Requirements: cada item vira comportamento coberto por teste.
+5. Subtarefas: na ordem numerada. O teste que falha vem antes da implementação.
+6. Detalhes de Implementação: vale a techspec citada. Origem de cópia, quando houver, é somente leitura.
+7. Critérios de Sucesso: a tarefa só fecha quando todos valem.
+8. Testes da Tarefa: crie e rode o que a seção lista. Não acrescente E2E quando a seção diz que não se aplica.
+9. Arquivos relevantes: o trabalho mora nesses caminhos.
+
+Marque as subtarefas e a linha em `tasks.md` só depois dos testes passarem. Uma tarefa por vez.

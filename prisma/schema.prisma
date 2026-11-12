@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/infrastructure/persistence/prisma/generated"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model AnonymousVisitor {
+  id         String                @id @default(uuid())
+  createdAt  DateTime              @default(now())
+  lastSeenAt DateTime              @default(now())
+  timeZone   String?
+  sessions   GameSession[]
+  progress   LearnerWordProgress[]
+  challenges ChallengeSession[]
+  reviews    ReviewSession[]
+}
+
+model Word {
+  id                   String                @id @default(uuid())
+  english              String
+  portuguese           String
+  englishNormalized    String
+  portugueseNormalized String
+  exampleSentence      String?
+  active               Boolean               @default(true)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  sessionWords         GameSessionWord[]
+  promptedAnswers      GameAnswer[]          @relation("PromptWord")
+  selectedAnswers      GameAnswer[]          @relation("SelectedWord")
+  learnerProgress      LearnerWordProgress[]
+  challengeWords       ChallengeSessionWord[]
+  reviewWords          ReviewSessionWord[]
+  typingAttempts       TypingAttempt[]
+
+  @@unique([englishNormalized, portugueseNormalized])
+  @@index([active])
+}
+
+model GameSession {
+  id             String            @id @default(uuid())
+  visitorId      String
+  status         String
+  targetWords    Int
+  correctAnswers Int               @default(0)
+  wrongAnswers   Int               @default(0)
+  startedAt      DateTime
+  finishedAt     DateTime?
+  durationMs     Int?
+  mode           String            @default("CLASSIC")
+  visitor        AnonymousVisitor  @relation(fields: [visitorId], references: [id])
+  words          GameSessionWord[]
+  answers        GameAnswer[]
+  review         ReviewSession?
+
+  @@index([visitorId])
+  @@index([status])
+}
+
+model GameSessionWord {
+  sessionId   String
+  wordId      String
+  sequence    Int
+  presentedAt DateTime?
+  completedAt DateTime?
+  graded      Boolean     @default(true)
+  session     GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  word        Word        @relation(fields: [wordId], references: [id])
+
+  @@id([sessionId, wordId])
+  @@unique([sessionId, sequence])
+  @@index([wordId])
+}
+
+model GameAnswer {
+  id                              String      @id @default(uuid())
+  attemptId                       String      @unique
+  sessionId                       String
+  sequence                        Int
+  promptWordId                    String
+  selectedWordId                  String
+  isCorrect                       Boolean
+  responseTimeMs                  Int
+  responseTimeMeasurementVersion  Int         @default(2)
+  createdAt                       DateTime
+  session                         GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  promptWord                      Word        @relation("PromptWord", fields: [promptWordId], references: [id])
+  selectedWord                    Word        @relation("SelectedWord", fields: [selectedWordId], references: [id])
+
+  @@unique([sessionId, sequence])
+  @@index([sessionId])
+  @@index([promptWordId])
+  @@index([selectedWordId])
+  @@index([promptWordId, createdAt])
+}
+
+model LearnerWordProgress {
+  visitorId                    String
+  wordId                       String
+  timesShown                   Int              @default(0)
+  correctCount                 Int              @default(0)
+  wrongCount                   Int              @default(0)
+  totalCorrectResponseTimeMs   BigInt           @default(0)
+  lastReviewedAt               DateTime?
+  nextReviewAt                 DateTime?
+  reviewRepetitions            Int              @default(0)
+  reviewLapses                 Int              @default(0)
+  reviewIntervalDays           Int              @default(0)
+  reviewEaseFactor             Float            @default(2.5)
+  reviewState                  String           @default("LEARNING")
+  createdAt                    DateTime         @default(now())
+  updatedAt                    DateTime         @updatedAt
+  visitor                      AnonymousVisitor @relation(fields: [visitorId], references: [id])
+  word                         Word             @relation(fields: [wordId], references: [id])
+
+  @@id([visitorId, wordId])
+  @@index([wordId])
+  @@index([visitorId, nextReviewAt])
+}
+
+model ChallengeSession {
+  id             String                 @id
+  visitorId      String
+  level          Int
+  status         String
+  score          Int                    @default(0)
+  bestStreak     Int                    @default(0)
+  correctAnswers Int                    @default(0)
+  wrongAnswers   Int                    @default(0)
+  createdAt      DateTime
+  startedAt      DateTime?
+  finishedAt     DateTime?
+  visitor        AnonymousVisitor       @relation(fields: [visitorId], references: [id])
+  words          ChallengeSessionWord[]
+  attempts       ChallengeAttempt[]
+
+  @@index([visitorId, level, status])
+}
+
+model ChallengeSessionWord {
+  sessionId   String
+  wordId      String
+  sequence    Int
+  completedAt DateTime?
+  session     ChallengeSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  word        Word             @relation(fields: [wordId], references: [id])
+
+  @@id([sessionId, wordId])
+  @@unique([sessionId, sequence])
+  @@index([wordId])
+}
+
+model ChallengeAttempt {
+  id             String           @id @default(uuid())
+  attemptId      String           @unique
+  sessionId      String
+  sequence       Int
+  promptWordId   String
+  selectedWordId String
+  isCorrect      Boolean
+  createdAt      DateTime
+  session        ChallengeSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, sequence])
+}
+
+model ReviewSession {
+  id            String              @id
+  visitorId     String
+  localDate     String
+  timeZone      String
+  status        String
+  gameSessionId String?             @unique
+  startedAt     DateTime
+  finishedAt    DateTime?
+  visitor       AnonymousVisitor    @relation(fields: [visitorId], references: [id])
+  gameSession   GameSession?        @relation(fields: [gameSessionId], references: [id], onDelete: Restrict)
+  words         ReviewSessionWord[]
+  attempts      TypingAttempt[]
+
+  @@index([visitorId, localDate])
+}
+
+model ReviewSessionWord {
+  sessionId String
+  wordId    String
+  sequence  Int
+  stage     String
+  origin    String
+  session   ReviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  word      Word          @relation(fields: [wordId], references: [id])
+
+  @@id([sessionId, wordId])
+  @@unique([sessionId, sequence])
+  @@index([wordId])
+}
+
+model TypingAttempt {
+  id              String        @id @default(uuid())
+  attemptId       String        @unique
+  sessionId       String
+  sequence        Int
+  wordId          String
+  outcome         String
+  typedText       String?
+  usedHint        Boolean
+  responseTimeMs  Int
+  grade           String?
+  isReinforcement Boolean
+  createdAt       DateTime
+  session         ReviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  word            Word          @relation(fields: [wordId], references: [id])
+
+  @@unique([sessionId, sequence])
+  @@index([sessionId])
+}
