@@ -95,7 +95,11 @@ async function withScreen(filePath: string, work: (rig: ScreenRig) => Promise<vo
     const clock = { now: OPENED_AT };
     const domainClock: Clock = { now: () => new Date(clock.now) };
     let nextId = 1;
-    const repository = new FlakyRepository(executor, runBetterSqliteTransaction(database), domainClock);
+    const repository = new FlakyRepository(
+      executor,
+      runBetterSqliteTransaction(database),
+      domainClock,
+    );
     const events: string[] = [];
     const composition = createPracticeComposition({
       catalog: new SqliteWordCatalog(executor, seededRandom(7), domainClock),
@@ -253,18 +257,28 @@ describe("practice screen on better-sqlite3", () => {
 
         expect(currentMatch(rig.controller).halted).toBe(true);
         expect(rig.events).toEqual(["practice.persist_failed"]);
-        expect(readSession(rig.database, sessionId)).toMatchObject({ correctAnswers: 2, wrongAnswers: 1 });
+        expect(readSession(rig.database, sessionId)).toMatchObject({
+          correctAnswers: 2,
+          wrongAnswers: 1,
+        });
 
         await rig.controller.retry();
         await rig.controller.attempt(tap("hit-y", second, second, 900));
         await rig.controller.attempt(tap("hit-y", second, second, 900));
 
         expect(currentMatch(rig.controller).halted).toBe(false);
-        expect(readSession(rig.database, sessionId)).toMatchObject({ correctAnswers: 4, wrongAnswers: 2 });
+        expect(readSession(rig.database, sessionId)).toMatchObject({
+          correctAnswers: 4,
+          wrongAnswers: 2,
+        });
         const answers = rig.database
           .prepare(`SELECT "attemptId" FROM "GameAnswer" WHERE "sessionId" = ? ORDER BY "sequence"`)
           .all(sessionId) as { attemptId: string }[];
-        expect(answers.map(({ attemptId }) => attemptId).slice(-3)).toEqual(["miss-x", "hit-x", "hit-y"]);
+        expect(answers.map(({ attemptId }) => attemptId).slice(-3)).toEqual([
+          "miss-x",
+          "hit-x",
+          "hit-y",
+        ]);
       });
     });
   });

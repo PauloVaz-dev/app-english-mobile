@@ -26,10 +26,7 @@ export function pointsForStreak(streak: number): number {
   return BASE_POINTS + Math.min((streak - 1) * STREAK_BONUS_STEP, MAX_STREAK_BONUS);
 }
 
-export function applyOutcome(
-  current: ChallengeScore,
-  isCorrect: boolean,
-): ChallengeScore {
+export function applyOutcome(current: ChallengeScore, isCorrect: boolean): ChallengeScore {
   if (!isCorrect) {
     return Object.freeze({
       ...current,

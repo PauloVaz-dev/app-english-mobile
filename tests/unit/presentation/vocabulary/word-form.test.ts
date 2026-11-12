@@ -99,16 +99,24 @@ describe("word form layout", () => {
 
     expect(view.title).toBe(WORD_FORM_TITLE);
     expect(view.title).toMatch(/palavra nova/i);
-    expect(view.fields.map((item) => item.field)).toEqual(["english", "portuguese", "exampleSentence"]);
+    expect(view.fields.map((item) => item.field)).toEqual([
+      "english",
+      "portuguese",
+      "exampleSentence",
+    ]);
     expect(view.fields.map((item) => item.accessibilityLabel)).toEqual([
       "Inglês, obrigatório",
       "Português, obrigatório",
       "Frase de exemplo, opcional",
     ]);
-    expect(view.fields.map((item) => item.marker)).toEqual(["obrigatório", "obrigatório", "opcional"]);
-    expect(view.fields.every((item) => item.error === null && item.accessibilityHint === undefined)).toBe(
-      true,
-    );
+    expect(view.fields.map((item) => item.marker)).toEqual([
+      "obrigatório",
+      "obrigatório",
+      "opcional",
+    ]);
+    expect(
+      view.fields.every((item) => item.error === null && item.accessibilityHint === undefined),
+    ).toBe(true);
     expect(view.notice).toBeNull();
   });
 
@@ -139,7 +147,11 @@ describe("word form controller", () => {
     expect(field(state, "portuguese").error).toBe("Escreva a tradução em português.");
     expect(field(state, "english").accessibilityHint).toBe("Escreva a palavra em inglês.");
     expect(field(state, "exampleSentence").error).toBeNull();
-    expect(state.values).toEqual({ english: "   ", portuguese: "", exampleSentence: "A sentence kept." });
+    expect(state.values).toEqual({
+      english: "   ",
+      portuguese: "",
+      exampleSentence: "A sentence kept.",
+    });
     expect(registration.calls).toEqual([]);
     expect(log).toEqual(["focus:english"]);
   });
@@ -279,7 +291,10 @@ describe("word form controller", () => {
 
     const first = controller.submit();
     expect(controller.state.saving).toBe(true);
-    expect(wordFormView(controller.state).submit).toMatchObject({ disabled: true, label: "Salvando…" });
+    expect(wordFormView(controller.state).submit).toMatchObject({
+      disabled: true,
+      label: "Salvando…",
+    });
 
     await controller.submit();
     expect(registration.calls).toHaveLength(1);

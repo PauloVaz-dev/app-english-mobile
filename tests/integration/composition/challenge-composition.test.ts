@@ -112,7 +112,14 @@ function seedStudiedCatalog(filePath: string): StudiedCatalog {
     );
     const extraIds = Array.from({ length: EXTRA_WORD_COUNT }, (_, index) => {
       const id = `extra-word-${String(index + 1).padStart(2, "0")}`;
-      insertWord.run(id, `extra ${index}`, `extra pt ${index}`, `extra ${index}`, `extra pt ${index}`, CREATED_AT);
+      insertWord.run(
+        id,
+        `extra ${index}`,
+        `extra pt ${index}`,
+        `extra ${index}`,
+        `extra pt ${index}`,
+        CREATED_AT,
+      );
       return id;
     });
     const allIds = [...vocabularySeed.map(({ id }) => id), ...extraIds];
@@ -325,7 +332,9 @@ describe("challenge composition on better-sqlite3", () => {
       const catalog = seedStudiedCatalog(filePath);
       const setup = new Database(filePath);
       setup
-        .prepare(`INSERT INTO "AnonymousVisitor" ("id", "createdAt", "lastSeenAt") VALUES (?, ?, ?)`)
+        .prepare(
+          `INSERT INTO "AnonymousVisitor" ("id", "createdAt", "lastSeenAt") VALUES (?, ?, ?)`,
+        )
         .run(OTHER_VISITOR_ID, CREATED_AT, CREATED_AT);
       setup.close();
       await useComposition(filePath, async ({ composition, database }) => {
@@ -355,7 +364,12 @@ describe("challenge composition on better-sqlite3", () => {
         expect(readStartedAt(database, round.challengeId)).toBe(at(1_000).toISOString());
 
         const hit = await composition.attempt(
-          { challengeId: round.challengeId, attemptId: "a-1", promptWordId: first, selectedWordId: first },
+          {
+            challengeId: round.challengeId,
+            attemptId: "a-1",
+            promptWordId: first,
+            selectedWordId: first,
+          },
           at(2_000),
         );
         expect(hit.lastAttempt?.isCorrect).toBe(true);
@@ -363,28 +377,51 @@ describe("challenge composition on better-sqlite3", () => {
         expect(hit.deadline).toEqual(at(1_000 + CHALLENGE_DURATION_MS));
         expect(hit.score.score).toBe(100);
         const repeated = await composition.attempt(
-          { challengeId: round.challengeId, attemptId: "a-1", promptWordId: first, selectedWordId: first },
+          {
+            challengeId: round.challengeId,
+            attemptId: "a-1",
+            promptWordId: first,
+            selectedWordId: first,
+          },
           at(3_000),
         );
         expect(repeated.score).toEqual(hit.score);
         await composition.attempt(
-          { challengeId: round.challengeId, attemptId: "a-2", promptWordId: second, selectedWordId: second },
+          {
+            challengeId: round.challengeId,
+            attemptId: "a-2",
+            promptWordId: second,
+            selectedWordId: second,
+          },
           at(4_000),
         );
         const miss = await composition.attempt(
-          { challengeId: round.challengeId, attemptId: "a-3", promptWordId: third, selectedWordId: first },
+          {
+            challengeId: round.challengeId,
+            attemptId: "a-3",
+            promptWordId: third,
+            selectedWordId: first,
+          },
           at(1_000 + CHALLENGE_DURATION_MS),
         );
         expect(miss.lastAttempt?.isCorrect).toBe(false);
         expect(miss.score.score).toBe(210);
         await expect(
           composition.attempt(
-            { challengeId: round.challengeId, attemptId: "a-4", promptWordId: third, selectedWordId: third },
+            {
+              challengeId: round.challengeId,
+              attemptId: "a-4",
+              promptWordId: third,
+              selectedWordId: third,
+            },
             at(1_000 + CHALLENGE_DURATION_MS + 1),
           ),
         ).rejects.toBeInstanceOf(ChallengeTimeExpiredError);
 
-        const result = await composition.expire(round.challengeId, at(1_000 + CHALLENGE_DURATION_MS));
+        const result = await composition.expire(
+          round.challengeId,
+          at(1_000 + CHALLENGE_DURATION_MS),
+        );
         expect(result).toEqual({
           challengeId: round.challengeId,
           status: "COMPLETED",
@@ -405,9 +442,9 @@ describe("challenge composition on better-sqlite3", () => {
           isNewRecord: result.isNewRecord,
         }).toEqual(record);
         expect(await composition.result(round.challengeId)).toEqual(result);
-        expect(await composition.expire(round.challengeId, at(1_000 + CHALLENGE_DURATION_MS + 5_000))).toEqual(
-          result,
-        );
+        expect(
+          await composition.expire(round.challengeId, at(1_000 + CHALLENGE_DURATION_MS + 5_000)),
+        ).toEqual(result);
       });
       expect(readStudyTables(filePath)).toEqual(before);
     });
@@ -475,11 +512,21 @@ describe("challenge pronunciation on better-sqlite3", () => {
               round.words.find(({ id }) => id === wordId)?.english;
             await composition.begin(round.challengeId, at(1_000));
             const hit = await composition.attempt(
-              { challengeId: round.challengeId, attemptId: "a-1", promptWordId: first, selectedWordId: first },
+              {
+                challengeId: round.challengeId,
+                attemptId: "a-1",
+                promptWordId: first,
+                selectedWordId: first,
+              },
               at(2_000),
             );
             const next = await composition.attempt(
-              { challengeId: round.challengeId, attemptId: "a-2", promptWordId: second, selectedWordId: second },
+              {
+                challengeId: round.challengeId,
+                attemptId: "a-2",
+                promptWordId: second,
+                selectedWordId: second,
+              },
               at(3_000),
             );
             expect(hit.score.score).toBe(100);
@@ -493,7 +540,10 @@ describe("challenge pronunciation on better-sqlite3", () => {
               "a-2",
             ]);
             expect(stored?.challenge.score).toEqual(next.score);
-            const result = await composition.expire(round.challengeId, at(1_000 + CHALLENGE_DURATION_MS));
+            const result = await composition.expire(
+              round.challengeId,
+              at(1_000 + CHALLENGE_DURATION_MS),
+            );
             expect(result).toMatchObject({ correctAnswers: 2, score: 210, isNewRecord: true });
           },
           { speech: deviceSpeech },
@@ -540,18 +590,33 @@ describe("challenge pronunciation on better-sqlite3", () => {
           }
           await composition.begin(round.challengeId, at(1_000));
           const miss = await composition.attempt(
-            { challengeId: round.challengeId, attemptId: "a-1", promptWordId: first, selectedWordId: second },
+            {
+              challengeId: round.challengeId,
+              attemptId: "a-1",
+              promptWordId: first,
+              selectedWordId: second,
+            },
             at(2_000),
           );
           expect(miss.lastAttempt?.isCorrect).toBe(false);
           expect(spoken).toEqual([]);
 
           await composition.attempt(
-            { challengeId: round.challengeId, attemptId: "a-2", promptWordId: first, selectedWordId: first },
+            {
+              challengeId: round.challengeId,
+              attemptId: "a-2",
+              promptWordId: first,
+              selectedWordId: first,
+            },
             at(3_000),
           );
           await composition.attempt(
-            { challengeId: round.challengeId, attemptId: "a-2", promptWordId: first, selectedWordId: first },
+            {
+              challengeId: round.challengeId,
+              attemptId: "a-2",
+              promptWordId: first,
+              selectedWordId: first,
+            },
             at(4_000),
           );
           expect(spoken).toEqual([round.words.find(({ id }) => id === first)?.english]);

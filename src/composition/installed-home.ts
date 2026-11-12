@@ -18,7 +18,10 @@ import {
 import { SqliteDailyReviewReader } from "@/persistence/sqlite-daily-review-reader";
 import { SqliteVisitorPreferences } from "@/persistence/sqlite-visitor-preferences";
 import type { DeviceCalendar } from "@/time/device-time-zone";
-import { readInstalledCalendars, watchInstalledForeground } from "@/time/installed-device-time-zone";
+import {
+  readInstalledCalendars,
+  watchInstalledForeground,
+} from "@/time/installed-device-time-zone";
 
 const MISSING_CALENDAR: readonly DeviceCalendar[] = [{ timeZone: null }];
 
@@ -65,7 +68,9 @@ function defaultInstalledHomeResources(): InstalledHomeResources {
   };
 }
 
-function rememberDatabase(openDatabase: () => Promise<SQLiteDatabase>): () => Promise<SQLiteDatabase> {
+function rememberDatabase(
+  openDatabase: () => Promise<SQLiteDatabase>,
+): () => Promise<SQLiteDatabase> {
   let pending: Promise<SQLiteDatabase> | null = null;
   return () => {
     if (pending === null) {

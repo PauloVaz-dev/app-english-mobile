@@ -6,11 +6,7 @@ import type {
 } from "@/lib/application/review/ports/daily-review-reader";
 import { DEFAULT_TIME_ZONE } from "@/lib/domain/learning/local-day";
 import { toHomeReviewSummaryView } from "@/lib/presentation/review/home-review-copy";
-import {
-  createHomeComposition,
-  startHomeEntry,
-  type HomeComposition,
-} from "@/composition/home";
+import { createHomeComposition, startHomeEntry, type HomeComposition } from "@/composition/home";
 import {
   HOME_MIGRATION_FAILED,
   HOME_SEED_FAILED,
@@ -64,7 +60,9 @@ describe("home composition", () => {
     const reader = new FixedReviewReader(summary);
     const events: HomeOpenFailure[] = [];
     const store = new ScriptedStudyStore();
-    const composition = createStudyComposition(store, reader, events, [{ timeZone: TOKYO_TIME_ZONE }]);
+    const composition = createStudyComposition(store, reader, events, [
+      { timeZone: TOKYO_TIME_ZONE },
+    ]);
     const view = await composition.load(STUDY_INSTANT);
     expect(view).toEqual(toHomeReviewSummaryView(summary, STUDY_INSTANT, TOKYO_TIME_ZONE));
     expect(view.nothingToReviewTitle).toBe("Nada para revisar hoje");
@@ -106,7 +104,9 @@ describe("home composition", () => {
     const store = new ScriptedStudyStore();
     store.failWordInsert = true;
     const composition = createStudyComposition(store, reader, events, [{ timeZone: null }]);
-    await expect(composition.load(STUDY_INSTANT)).rejects.toMatchObject({ event: HOME_SEED_FAILED });
+    await expect(composition.load(STUDY_INSTANT)).rejects.toMatchObject({
+      event: HOME_SEED_FAILED,
+    });
     expect(events).toEqual([HOME_SEED_FAILED]);
     expect(reader.calls).toEqual([]);
     expect(store.visitor).toBeNull();
@@ -127,7 +127,9 @@ describe("home composition", () => {
     const events: HomeOpenFailure[] = [];
     const store = new ScriptedStudyStore();
     const composition = createStudyComposition(store, reader, events, [{ timeZone: null }]);
-    await expect(composition.load(STUDY_INSTANT)).rejects.toMatchObject({ event: HOME_SUMMARY_FAILED });
+    await expect(composition.load(STUDY_INSTANT)).rejects.toMatchObject({
+      event: HOME_SUMMARY_FAILED,
+    });
     expect(events).toEqual([HOME_SUMMARY_FAILED]);
     expect(store.visitor?.visitorId).toBe(VISITOR_ID);
     reader.fail = false;
@@ -296,7 +298,7 @@ function writeScriptedRow(
   statement: string,
   params: readonly SqlValue[] | undefined,
 ): void {
-  if (statement.includes("\"Word\"")) {
+  if (statement.includes('"Word"')) {
     if (store.failWordInsert) {
       throw new Error("seed failed");
     }

@@ -63,8 +63,7 @@ export function resolveSessionReviewGrade(
   attempt: ReviewAttempt,
 ): ReviewGrade | null {
   const missedBefore = previousAttempts.some(
-    (previous) =>
-      previous.promptWordId === attempt.promptWordId && !previous.isCorrect,
+    (previous) => previous.promptWordId === attempt.promptWordId && !previous.isCorrect,
   );
   return missedBefore ? null : gradeAttempt(attempt);
 }
@@ -125,10 +124,7 @@ export function isReviewDue(schedule: ReviewSchedule, now: Date): boolean {
   return schedule.nextReviewAt.getTime() <= now.getTime();
 }
 
-function nextIntervalDays(
-  previous: ReviewSchedule,
-  grade: Exclude<ReviewGrade, "AGAIN">,
-): number {
+function nextIntervalDays(previous: ReviewSchedule, grade: Exclude<ReviewGrade, "AGAIN">): number {
   if (previous.repetitions === 0) {
     return FIRST_INTERVAL_DAYS[grade];
   }
@@ -141,10 +137,7 @@ function nextIntervalDays(
       : grade === "EASY"
         ? previous.easeFactor * EASY_BONUS_MULTIPLIER
         : previous.easeFactor;
-  return Math.max(
-    previous.intervalDays + 1,
-    Math.round(previous.intervalDays * multiplier),
-  );
+  return Math.max(previous.intervalDays + 1, Math.round(previous.intervalDays * multiplier));
 }
 
 function initialSchedule(reviewedAt: Date): ReviewSchedule {

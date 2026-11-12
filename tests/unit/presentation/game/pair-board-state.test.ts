@@ -120,7 +120,9 @@ describe("pair board state: creation and readiness", () => {
     expect(blocked.effects).toEqual([]);
     expect(blocked.state.ready).toBe(false);
     expect(enabled.effects).toHaveLength(1);
-    expect(Object.values(enabled.state.pairEnteredAtMs)).toEqual(Array(BOARD_PAIR_LIMIT).fill(3_000));
+    expect(Object.values(enabled.state.pairEnteredAtMs)).toEqual(
+      Array(BOARD_PAIR_LIMIT).fill(3_000),
+    );
   });
 });
 

@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { formatReviewCounts, type HomeReviewSummaryView } from "@/lib/presentation/review/home-review-copy";
+import {
+  formatReviewCounts,
+  type HomeReviewSummaryView,
+} from "@/lib/presentation/review/home-review-copy";
 import { homeEntryLayout } from "@/lib/presentation/home/home-entry-layout";
 
 const PENDING_SUMMARY: HomeReviewSummaryView = {

@@ -24,7 +24,12 @@ import {
   type ForeignKeyExpectation,
   type IndexExpectation,
 } from "../../support/expected-sqlite-schema";
-import { readColumns, readForeignKeys, readIndexes, readTableNames } from "../../support/read-sqlite-schema";
+import {
+  readColumns,
+  readForeignKeys,
+  readIndexes,
+  readTableNames,
+} from "../../support/read-sqlite-schema";
 import { withDatabaseFile } from "../../support/temporary-database";
 
 const FOREIGN_KEYS_ENABLED = 1;
@@ -61,10 +66,14 @@ describe("sqlite schema version 1", () => {
           "connection:PRAGMA foreign_keys = ON",
           "connection:PRAGMA journal_mode = WAL",
         ]);
-        expect(eventsInsideTransaction(trace.events).some((event) => event.includes("PRAGMA user_version = 1"))).toBe(
-          true,
-        );
-        expect(eventsInsideTransaction(trace.events).some((event) => event.includes("CREATE TABLE"))).toBe(true);
+        expect(
+          eventsInsideTransaction(trace.events).some((event) =>
+            event.includes("PRAGMA user_version = 1"),
+          ),
+        ).toBe(true);
+        expect(
+          eventsInsideTransaction(trace.events).some((event) => event.includes("CREATE TABLE")),
+        ).toBe(true);
         expectSchema(database);
         await insertLearnerWord(trace.executor);
         await expect(insertDuplicateWord(trace.executor)).rejects.toThrow();
@@ -113,7 +122,9 @@ function expectSchema(database: Database.Database): void {
   for (const tableName of PRODUCT_TABLES) {
     const expected = EXPECTED_TABLES[tableName];
     expect(readColumns(database, tableName)).toEqual(expected?.columns);
-    expect(readForeignKeys(database, tableName)).toEqual(sortForeignKeys(expected?.foreignKeys ?? []));
+    expect(readForeignKeys(database, tableName)).toEqual(
+      sortForeignKeys(expected?.foreignKeys ?? []),
+    );
     expect(readIndexes(database, tableName)).toEqual(sortIndexes(expected?.indexes ?? []));
   }
 }
@@ -274,23 +285,39 @@ describe("sqlite daily review summary", () => {
         const later = new Date(STUDY_INSTANT.getTime() + ONE_DAY_MS * 2);
         const inactiveSoon = new Date(STUDY_INSTANT.getTime() + ONE_MINUTE_MS);
         const otherSoon = new Date(STUDY_INSTANT.getTime() + ONE_MINUTE_MS * 2);
-        insertPlainWord(database, { wordId: "inactive-word", active: INACTIVE_WORD, now: STUDY_INSTANT });
+        insertPlainWord(database, {
+          wordId: "inactive-word",
+          active: INACTIVE_WORD,
+          now: STUDY_INSTANT,
+        });
         insertStoredVisitor(database, OTHER_VISITOR_ID, STUDY_INSTANT);
         insertReviewProgress(database, {
           visitorId,
           wordId: pastWord.id,
           nextReviewAt: new Date(STUDY_INSTANT.getTime() - ONE_MINUTE_MS),
         });
-        insertReviewProgress(database, { visitorId, wordId: currentWord.id, nextReviewAt: STUDY_INSTANT });
+        insertReviewProgress(database, {
+          visitorId,
+          wordId: currentWord.id,
+          nextReviewAt: STUDY_INSTANT,
+        });
         insertReviewProgress(database, { visitorId, wordId: soonerWord.id, nextReviewAt: sooner });
         insertReviewProgress(database, { visitorId, wordId: laterWord.id, nextReviewAt: later });
-        insertReviewProgress(database, { visitorId, wordId: "inactive-word", nextReviewAt: inactiveSoon });
+        insertReviewProgress(database, {
+          visitorId,
+          wordId: "inactive-word",
+          nextReviewAt: inactiveSoon,
+        });
         insertReviewProgress(database, {
           visitorId: OTHER_VISITOR_ID,
           wordId: otherWord.id,
           nextReviewAt: otherSoon,
         });
-        const summary = await executeSummary(createBetterSqliteExecutor(database), visitorId, STUDY_INSTANT);
+        const summary = await executeSummary(
+          createBetterSqliteExecutor(database),
+          visitorId,
+          STUDY_INSTANT,
+        );
         expect(summary.dueCount).toBe(PAST_AND_CURRENT_DUE_COUNT);
         expect(summary.nextReviewAt).toEqual(sooner);
         expect(summary.newAvailable).toBe(DAILY_NEW_WORD_LIMIT);
@@ -336,7 +363,11 @@ describe("sqlite daily review summary", () => {
         });
         const executor = createBetterSqliteExecutor(database);
         const beforeZone = await executeSummary(executor, visitorId, BOUNDARY_INSTANT);
-        await new SqliteVisitorPreferences(executor).saveTimeZone(visitorId, TOKYO_TIME_ZONE, BOUNDARY_INSTANT);
+        await new SqliteVisitorPreferences(executor).saveTimeZone(
+          visitorId,
+          TOKYO_TIME_ZONE,
+          BOUNDARY_INSTANT,
+        );
         const tokyo = await executeSummary(executor, visitorId, BOUNDARY_INSTANT);
         expect(beforeZone).toEqual({
           dueCount: 0,
@@ -419,39 +450,47 @@ function insertStoredVisitor(database: Database.Database, visitorId: string, now
 }
 
 function insertPlainWord(database: Database.Database, word: PlainWord): void {
-  database.prepare(INSERT_WORD_SQL).run(
-    word.wordId,
-    `english ${word.wordId}`,
-    `portuguese ${word.wordId}`,
-    `english ${word.wordId}`,
-    `portuguese ${word.wordId}`,
-    word.active,
-    word.now.toISOString(),
-  );
+  database
+    .prepare(INSERT_WORD_SQL)
+    .run(
+      word.wordId,
+      `english ${word.wordId}`,
+      `portuguese ${word.wordId}`,
+      `english ${word.wordId}`,
+      `portuguese ${word.wordId}`,
+      word.active,
+      word.now.toISOString(),
+    );
 }
 
 function insertReviewProgress(database: Database.Database, progress: StoredProgress): void {
   const storedAt = progress.nextReviewAt.toISOString();
-  database.prepare(INSERT_PROGRESS_SQL).run(progress.visitorId, progress.wordId, storedAt, storedAt);
+  database
+    .prepare(INSERT_PROGRESS_SQL)
+    .run(progress.visitorId, progress.wordId, storedAt, storedAt);
 }
 
 function insertIntroduction(database: Database.Database, introduction: StoredIntroduction): void {
   const storedAt = introduction.now.toISOString();
-  database.prepare(INSERT_SESSION_SQL).run(
-    introduction.sessionId,
-    introduction.visitorId,
-    introduction.localDate,
-    DEFAULT_TIME_ZONE,
-    REVIEW_SESSION_STATUS,
-    storedAt,
-  );
-  database.prepare(INSERT_SESSION_WORD_SQL).run(
-    introduction.sessionId,
-    introduction.wordId,
-    FIRST_SEQUENCE,
-    MATCHING_STAGE,
-    introduction.origin,
-  );
+  database
+    .prepare(INSERT_SESSION_SQL)
+    .run(
+      introduction.sessionId,
+      introduction.visitorId,
+      introduction.localDate,
+      DEFAULT_TIME_ZONE,
+      REVIEW_SESSION_STATUS,
+      storedAt,
+    );
+  database
+    .prepare(INSERT_SESSION_WORD_SQL)
+    .run(
+      introduction.sessionId,
+      introduction.wordId,
+      FIRST_SEQUENCE,
+      MATCHING_STAGE,
+      introduction.origin,
+    );
 }
 
 function seedLargeCatalog(database: Database.Database, now: Date): Date {
@@ -518,7 +557,12 @@ function writeActiveSchedule(schedule: ActiveSchedule): void {
   }
   const dayOffset = futureIndex + FIRST_FUTURE_DAY;
   const reviewAt = new Date(schedule.now.getTime() + dayOffset * ONE_DAY_MS).toISOString();
-  schedule.statements.insertProgress.run(SUMMARY_VISITOR_ID, schedule.wordId, reviewAt, schedule.storedAt);
+  schedule.statements.insertProgress.run(
+    SUMMARY_VISITOR_ID,
+    schedule.wordId,
+    reviewAt,
+    schedule.storedAt,
+  );
 }
 
 function insertIntroducedWords(statements: CatalogStatements, now: Date): void {
@@ -548,7 +592,9 @@ function insertIntroducedWords(statements: CatalogStatements, now: Date): void {
 function insertOtherLearnerRows(statements: CatalogStatements, now: Date): void {
   const storedAt = now.toISOString();
   const localDate = localDateOf(now, DEFAULT_TIME_ZONE);
-  const wordId = formatCatalogWordId(DUE_CATALOG_COUNT + FUTURE_CATALOG_COUNT + INTRODUCED_TODAY_COUNT);
+  const wordId = formatCatalogWordId(
+    DUE_CATALOG_COUNT + FUTURE_CATALOG_COUNT + INTRODUCED_TODAY_COUNT,
+  );
   const past = new Date(now.getTime() - ONE_MINUTE_MS).toISOString();
   statements.insertProgress.run(OTHER_VISITOR_ID, wordId, past, storedAt);
   statements.insertSession.run(

@@ -62,7 +62,10 @@ export function ChallengeScreen() {
   }
 }
 
-function useChallengeScreen(): { state: ChallengeScreenState; controller: ChallengeScreenController } {
+function useChallengeScreen(): {
+  state: ChallengeScreenState;
+  controller: ChallengeScreenController;
+} {
   const [state, setState] = useState<ChallengeScreenState>({ kind: "intro" });
   const [controller] = useState(
     () =>
@@ -205,7 +208,9 @@ function ChallengeRound({
       <View style={styles.header}>
         <HomeAction action={CHALLENGE_INTRO.leave} />
         <View accessible accessibilityLabel={clock.accessibilityLabel} style={styles.stat}>
-          <Text style={[styles.clock, clock.urgent ? styles.clockUrgent : null]}>{clock.label}</Text>
+          <Text style={[styles.clock, clock.urgent ? styles.clockUrgent : null]}>
+            {clock.label}
+          </Text>
           {clock.urgentText === null ? null : (
             <Text style={styles.urgentText}>{clock.urgentText}</Text>
           )}
@@ -304,11 +309,15 @@ function ChallengeResult({
           </View>
         ))}
         {result.recordText === "" ? null : (
-          <Text style={result.isNewRecord ? styles.recordNew : styles.muted}>{result.recordText}</Text>
+          <Text style={result.isNewRecord ? styles.recordNew : styles.muted}>
+            {result.recordText}
+          </Text>
         )}
       </View>
       <View style={styles.actions}>
-        {playAgain === undefined ? null : <PrimaryAction action={playAgain} onPress={onPlayAgain} />}
+        {playAgain === undefined ? null : (
+          <PrimaryAction action={playAgain} onPress={onPlayAgain} />
+        )}
         {home === undefined ? null : <HomeAction action={home} />}
       </View>
     </ChallengeCanvas>

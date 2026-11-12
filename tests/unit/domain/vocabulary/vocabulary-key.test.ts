@@ -17,8 +17,6 @@ describe("vocabularyKey", () => {
   });
 
   it("ignores spaces inside a multi-word term", () => {
-    expect(vocabularyKey("give up", "desistir")).toBe(
-      vocabularyKey("giveup", "desistir"),
-    );
+    expect(vocabularyKey("give up", "desistir")).toBe(vocabularyKey("giveup", "desistir"));
   });
 });

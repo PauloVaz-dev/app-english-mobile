@@ -12,10 +12,7 @@ import {
   toHomeReviewSummaryView,
   type HomeReviewSummaryView,
 } from "@/lib/presentation/review/home-review-copy";
-import {
-  HOME_MIGRATION_FAILED,
-  type HomeOpenFailure,
-} from "@/observability/home-open-log";
+import { HOME_MIGRATION_FAILED, type HomeOpenFailure } from "@/observability/home-open-log";
 import { SUPPORTED_SCHEMA_VERSION } from "@/persistence/migrate";
 import { SqliteDailyReviewReader } from "@/persistence/sqlite-daily-review-reader";
 import { SqliteVisitorPreferences } from "@/persistence/sqlite-visitor-preferences";
@@ -128,7 +125,9 @@ async function openHome(filePath: string, events: HomeOpenFailure[]): Promise<Op
 }
 
 function readVisitorIds(database: Database.Database): string[] {
-  const rows = database.prepare(`SELECT "id" AS "visitorId" FROM "AnonymousVisitor"`).all() as VisitorRow[];
+  const rows = database
+    .prepare(`SELECT "id" AS "visitorId" FROM "AnonymousVisitor"`)
+    .all() as VisitorRow[];
   return rows.map((row) => row.visitorId);
 }
 
@@ -138,7 +137,9 @@ function readWordCount(database: Database.Database): number {
 }
 
 function readTimeZone(database: Database.Database): string | null {
-  const row = database.prepare(`SELECT "timeZone" AS "timeZone" FROM "AnonymousVisitor"`).get() as TimeZoneRow;
+  const row = database
+    .prepare(`SELECT "timeZone" AS "timeZone" FROM "AnonymousVisitor"`)
+    .get() as TimeZoneRow;
   return row.timeZone;
 }
 

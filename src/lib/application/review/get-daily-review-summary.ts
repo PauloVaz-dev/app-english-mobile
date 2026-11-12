@@ -22,6 +22,10 @@ export class GetDailyReviewSummary {
   async execute(input: GetDailyReviewSummaryInput): Promise<DailyReviewSummary> {
     const stored = await this.dependencies.preferences.getTimeZone(input.visitorId);
     const timeZone = stored && isValidTimeZone(stored) ? stored : DEFAULT_TIME_ZONE;
-    return this.dependencies.reader.summary(input.visitorId, this.dependencies.clock.now(), timeZone);
+    return this.dependencies.reader.summary(
+      input.visitorId,
+      this.dependencies.clock.now(),
+      timeZone,
+    );
   }
 }

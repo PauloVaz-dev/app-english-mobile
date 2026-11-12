@@ -73,7 +73,12 @@ describe("challenge draw over active words", () => {
     const fresh = words(10, "fresh");
     const drawn = draw([...fresh, ...studied], studied, 6);
     expect(drawn).toHaveLength(6);
-    expect(drawn.slice(0, 3).map(({ id }) => id).sort()).toEqual(studied.map(({ id }) => id).sort());
+    expect(
+      drawn
+        .slice(0, 3)
+        .map(({ id }) => id)
+        .sort(),
+    ).toEqual(studied.map(({ id }) => id).sort());
     for (const word of drawn.slice(3)) {
       expect(word.id.startsWith("fresh-")).toBe(true);
     }

@@ -69,8 +69,6 @@ describe("review priority", () => {
     candidate({ wrongAnswers: 1, timeToCorrectMs: -1 }),
     candidate({ wrongAnswers: 1, difficulty: "UNKNOWN" as never }),
   ])("rejects an invalid review candidate", (input) => {
-    expect(() => selectReviewPriority([input])).toThrow(
-      InvalidReviewCandidateError,
-    );
+    expect(() => selectReviewPriority([input])).toThrow(InvalidReviewCandidateError);
   });
 });

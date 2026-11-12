@@ -1,7 +1,5 @@
 import { InvalidLearningSnapshotError } from "./errors";
-import {
-  createLearningProgressSnapshot,
-} from "./progress-metrics";
+import { createLearningProgressSnapshot } from "./progress-metrics";
 import type { LearningProgressSnapshot } from "./types";
 
 export interface AttemptProgressInput {
@@ -23,8 +21,7 @@ export function applyAttemptToProgress(
   return createLearningProgressSnapshot({
     ...snapshot,
     correctCount: snapshot.correctCount + 1,
-    totalCorrectResponseTimeMs:
-      snapshot.totalCorrectResponseTimeMs + input.responseTimeMs,
+    totalCorrectResponseTimeMs: snapshot.totalCorrectResponseTimeMs + input.responseTimeMs,
   });
 }
 
@@ -43,13 +40,9 @@ export function assertAttemptProgressAllowed(
 ): void {
   const timesShown = current?.timesShown ?? 0;
   if (timesShown === 0) {
-    throw new InvalidLearningSnapshotError(
-      "Attempts require at least one recorded exposure.",
-    );
+    throw new InvalidLearningSnapshotError("Attempts require at least one recorded exposure.");
   }
   if (!input.isCorrect && timesShown === 0) {
-    throw new InvalidLearningSnapshotError(
-      "Wrong answers require at least one recorded exposure.",
-    );
+    throw new InvalidLearningSnapshotError("Wrong answers require at least one recorded exposure.");
   }
 }

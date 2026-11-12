@@ -26,7 +26,11 @@ export function UnavailableActivity({ title }: { title: string }) {
       <Text accessibilityRole="header" style={[styles.title, { color: theme.text }]}>
         {title}
       </Text>
-      <Text accessibilityRole="text" accessibilityLabel={announcement} style={{ color: theme.text }}>
+      <Text
+        accessibilityRole="text"
+        accessibilityLabel={announcement}
+        style={{ color: theme.text }}
+      >
         {UNAVAILABLE_ACTIVITY_MESSAGE}
       </Text>
       <Link href="/" dismissTo asChild>

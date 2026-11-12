@@ -35,7 +35,11 @@ describe("GetDailyReviewSummary", () => {
   });
 
   it("summarizes due words, remaining new words and the next future review", async () => {
-    seedCatalog(reader, [buildWord("due-a"), buildWord("due-b"), buildWord("new-a"), buildWord("later")], now);
+    seedCatalog(
+      reader,
+      [buildWord("due-a"), buildWord("due-b"), buildWord("new-a"), buildWord("later")],
+      now,
+    );
     reader.addSchedule(visitorId, "due-a", buildSchedule("REVIEW", dueAt));
     reader.addSchedule(visitorId, "due-b", buildSchedule("LEARNING", dueAt));
     reader.addSchedule(visitorId, "later", buildSchedule("REVIEW", futureAt));

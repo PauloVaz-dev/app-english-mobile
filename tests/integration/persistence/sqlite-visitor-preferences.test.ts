@@ -158,7 +158,9 @@ function readVisitor(database: Database.Database): StoredVisitor {
 }
 
 function readLearnerCount(database: Database.Database): number {
-  const row = database.prepare(`SELECT COUNT(*) AS "total" FROM "AnonymousVisitor"`).get() as CountRow;
+  const row = database
+    .prepare(`SELECT COUNT(*) AS "total" FROM "AnonymousVisitor"`)
+    .get() as CountRow;
   return row.total;
 }
 

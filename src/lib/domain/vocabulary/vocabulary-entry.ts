@@ -32,10 +32,7 @@ export class VocabularyEntry {
     readonly active: boolean,
   ) {}
 
-  static create(input: {
-    readonly id: string;
-    readonly texts: VocabularyTexts;
-  }): VocabularyEntry {
+  static create(input: { readonly id: string; readonly texts: VocabularyTexts }): VocabularyEntry {
     return new VocabularyEntry(requireEntryId(input.id), input.texts, true);
   }
 
@@ -92,10 +89,7 @@ export function findDuplicateEntry(
   return entries.find((entry) => entry.id !== exceptId && entry.key() === key);
 }
 
-export function compareVocabularyEntries(
-  left: VocabularyEntry,
-  right: VocabularyEntry,
-): number {
+export function compareVocabularyEntries(left: VocabularyEntry, right: VocabularyEntry): number {
   const byEnglish = left.english.localeCompare(right.english, "en", {
     sensitivity: "base",
   });

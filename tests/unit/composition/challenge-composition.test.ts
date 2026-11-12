@@ -132,7 +132,11 @@ describe("challenge composition with a fake catalog", () => {
   it("records challenge.persist_failed when the session cannot be stored", async () => {
     const failure = new Error("disk full");
     const events: ChallengeEvent[] = [];
-    const composition = compose(new FakeCatalog(() => sampleWords(2)), new SpyStore(failure), events);
+    const composition = compose(
+      new FakeCatalog(() => sampleWords(2)),
+      new SpyStore(failure),
+      events,
+    );
     await expect(composition.start(VISITOR_ID)).rejects.toBe(failure);
     expect(CHALLENGE_PERSIST_FAILED).toBe("challenge.persist_failed");
     expect(events).toEqual([CHALLENGE_PERSIST_FAILED]);

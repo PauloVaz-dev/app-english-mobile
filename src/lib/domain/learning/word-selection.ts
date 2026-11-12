@@ -44,9 +44,7 @@ interface StudiedPools {
 
 export function selectFreePracticeWords(input: FreePracticeSelectionInput): readonly Word[] {
   const studied = sortWordsById(
-    input.words.filter(
-      (word) => readActiveSchedule(word, input.scheduleByWordId) !== null,
-    ),
+    input.words.filter((word) => readActiveSchedule(word, input.scheduleByWordId) !== null),
   );
   if (studied.length < FREE_PRACTICE_MINIMUM_WORDS) {
     throw new NotEnoughStudiedWordsError(studied.length, FREE_PRACTICE_MINIMUM_WORDS);

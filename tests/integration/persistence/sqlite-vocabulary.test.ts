@@ -359,8 +359,8 @@ describe("SqliteVocabularyRepository with create-word", () => {
     await withDatabaseFile(async (filePath) => {
       const database = await openDatabase(filePath, OPENED_AT);
       try {
-        const total = await repositoryFor(database).transaction(async (store) =>
-          (await store.listAll()).length,
+        const total = await repositoryFor(database).transaction(
+          async (store) => (await store.listAll()).length,
         );
         expect(total).toBe(INITIAL_WORD_COUNT);
       } finally {

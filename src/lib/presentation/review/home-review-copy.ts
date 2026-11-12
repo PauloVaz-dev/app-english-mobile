@@ -36,11 +36,7 @@ export function toHomeReviewSummaryView(
   };
 }
 
-function formatNextReviewDetail(
-  nextReviewAt: Date,
-  now: Date,
-  timeZone: string,
-): string {
+function formatNextReviewDetail(nextReviewAt: Date, now: Date, timeZone: string): string {
   const reviewDay = localDateOf(nextReviewAt, timeZone);
   const tomorrow = localDateOf(startOfLocalDay(now, timeZone, 1), timeZone);
   if (reviewDay === tomorrow) {

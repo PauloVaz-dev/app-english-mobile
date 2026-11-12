@@ -199,9 +199,9 @@ describe("word registration with a fake repository", () => {
       },
     });
 
-    await expect(
-      registration.register({ english: "pear", portuguese: "pera" }),
-    ).rejects.toBe(failure);
+    await expect(registration.register({ english: "pear", portuguese: "pera" })).rejects.toBe(
+      failure,
+    );
   });
 
   it("runs calls one transaction at a time, in call order", async () => {
@@ -291,7 +291,10 @@ describe("prepared word registration", () => {
 
 describe("word registration boundary", () => {
   const read = (path: string) =>
-    readFileSync(fileURLToPath(new URL(`../../../src/composition/${path}`, import.meta.url)), "utf8");
+    readFileSync(
+      fileURLToPath(new URL(`../../../src/composition/${path}`, import.meta.url)),
+      "utf8",
+    );
 
   it("keeps Expo and React Native out of the pure composition", () => {
     const source = read("word-registration.ts");

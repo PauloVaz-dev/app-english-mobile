@@ -1,7 +1,15 @@
 import { StatusBar } from "expo-status-bar";
 import { Link } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View, type TextStyle, type ViewStyle } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  type TextStyle,
+  type ViewStyle,
+} from "react-native";
 
 import { createInstalledHomeEntry } from "@/composition/installed-home";
 import {
@@ -23,9 +31,7 @@ const CARD_BORDER_WIDTH = 1;
 const ACTION_BORDER_WIDTH = 1;
 
 type HomeStatus =
-  | { kind: "loading" }
-  | { kind: "failed" }
-  | { kind: "ready"; view: HomeReviewSummaryView };
+  { kind: "loading" } | { kind: "failed" } | { kind: "ready"; view: HomeReviewSummaryView };
 
 export function HomeEntryScreen() {
   const { status, retry } = useHomeEntry();
@@ -182,7 +188,9 @@ function ReviewCard({ layout, announcement }: { layout: HomeEntryLayout; announc
     <View accessible accessibilityRole="text" accessibilityLabel={announcement} style={styles.card}>
       <Text style={styles.cardLabel}>{layout.cardLabel}</Text>
       <Text style={styles.cardSummary}>{layout.cardSummary}</Text>
-      {layout.cardDetail === null ? null : <Text style={styles.cardDetail}>{layout.cardDetail}</Text>}
+      {layout.cardDetail === null ? null : (
+        <Text style={styles.cardDetail}>{layout.cardDetail}</Text>
+      )}
       <View style={styles.actions}>
         {layout.actions.map((action) => (
           <EntryAction key={action.href} action={action} />

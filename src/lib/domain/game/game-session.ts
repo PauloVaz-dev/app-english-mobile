@@ -82,11 +82,7 @@ export class GameSession {
     const visitorId = requireIdentifier(input.visitorId, "Visitor id");
     const mode = resolveStartMode(input.mode);
     validateSessionWords(input.words, mode);
-    const ungradedWordIds = resolveUngradedWordIds(
-      input.words,
-      mode,
-      input.ungradedWordIds,
-    );
+    const ungradedWordIds = resolveUngradedWordIds(input.words, mode, input.ungradedWordIds);
     const startedAt = readClock(clock);
     return new GameSession({
       id,
@@ -209,10 +205,7 @@ export class GameSession {
     this.finishTime = finishedAt;
   }
 
-  recordExposures(
-    wordIds: readonly string[],
-    clock: Clock,
-  ): readonly SessionExposure[] {
+  recordExposures(wordIds: readonly string[], clock: Clock): readonly SessionExposure[] {
     this.assertActive();
     const normalized = validateExposureBatch(wordIds);
     const occurredAt = readClock(clock);
@@ -273,13 +266,8 @@ export class GameSession {
     const correctAnswers = attemptsAtResult.filter(
       (recordedAttempt) => recordedAttempt.isCorrect,
     ).length;
-    const status =
-      correctAnswers === this.targetWords ? "COMPLETED" : "ACTIVE";
-    const metrics = this.calculateMetricsFor(
-      attemptsAtResult,
-      status,
-      attempt.occurredAt,
-    );
+    const status = correctAnswers === this.targetWords ? "COMPLETED" : "ACTIVE";
+    const metrics = this.calculateMetricsFor(attemptsAtResult, status, attempt.occurredAt);
     return {
       attempt: cloneAttempt(attempt),
       isCorrect: attempt.isCorrect,
@@ -298,11 +286,7 @@ export class GameSession {
   }
 
   private calculateMetrics(measuredAt: Date): GameMetrics {
-    return this.calculateMetricsFor(
-      this.recordedAttempts,
-      this.currentStatus,
-      measuredAt,
-    );
+    return this.calculateMetricsFor(this.recordedAttempts, this.currentStatus, measuredAt);
   }
 
   private calculateMetricsFor(
@@ -323,8 +307,7 @@ export class GameSession {
       correctAnswers,
       wrongAnswers: totalAttempts - correctAnswers,
       accuracy: totalAttempts === 0 ? 0 : (correctAnswers / totalAttempts) * 100,
-      averageResponseTimeMs:
-        totalAttempts === 0 ? 0 : totalResponseTime / totalAttempts,
+      averageResponseTimeMs: totalAttempts === 0 ? 0 : totalResponseTime / totalAttempts,
       durationMs: measuredAt.getTime() - this.startTime.getTime(),
     };
   }
@@ -373,14 +356,9 @@ function validateSnapshot(snapshot: GameSessionSnapshot): void {
   validateCanonicalIdentifier(snapshot.visitorId, "Visitor id");
   const status = validateSnapshotStatus(snapshot.status);
   if (snapshot.targetWords !== snapshot.words.length) {
-    throw new InvalidGameSessionError(
-      "Snapshot target does not match the session words.",
-    );
+    throw new InvalidGameSessionError("Snapshot target does not match the session words.");
   }
-  if (
-    snapshot.mode === "FREE" &&
-    snapshot.words.some((entry) => entry.graded)
-  ) {
+  if (snapshot.mode === "FREE" && snapshot.words.some((entry) => entry.graded)) {
     throw new InvalidGameSessionError("A free session cannot grade words.");
   }
   validateSessionWords(
@@ -489,9 +467,7 @@ function validateSnapshotCompletions(
     assertWithinTimeline(completedAt, timeline, "Completion time");
     const correctAttempt = correctAttempts.get(entry.word.id);
     if (!correctAttempt || correctAttempt.occurredAt.getTime() !== completedAt.getTime()) {
-      throw new InvalidGameSessionError(
-        "Completed words and correct attempts are inconsistent.",
-      );
+      throw new InvalidGameSessionError("Completed words and correct attempts are inconsistent.");
     }
     completedIds.add(entry.word.id);
   }
@@ -499,9 +475,7 @@ function validateSnapshotCompletions(
     completedIds.has(wordId),
   );
   if (completedIds.size !== correctAttempts.size || !hasEveryCorrectWord) {
-    throw new InvalidGameSessionError(
-      "Completed words and correct attempts are inconsistent.",
-    );
+    throw new InvalidGameSessionError("Completed words and correct attempts are inconsistent.");
   }
   if (status === "COMPLETED" && completedIds.size !== snapshot.targetWords) {
     throw new InvalidGameSessionError("A completed session must complete every target word.");
@@ -522,9 +496,7 @@ function validateAutomaticCompletion(
     ...[...correctAttempts.values()].map(({ occurredAt }) => occurredAt.getTime()),
   );
   if (finishedAt?.getTime() !== latestCorrectAttempt) {
-    throw new InvalidGameSessionError(
-      "Completion time must match the final correct attempt.",
-    );
+    throw new InvalidGameSessionError("Completion time must match the final correct attempt.");
   }
 }
 
@@ -572,18 +544,13 @@ function validateCanonicalIdentifier(value: unknown, field: string): void {
   }
 }
 
-function validateCanonicalAttempt(
-  attempt: GameAttempt,
-  normalized: RecordAttemptInput,
-): void {
+function validateCanonicalAttempt(attempt: GameAttempt, normalized: RecordAttemptInput): void {
   if (
     attempt.attemptId !== normalized.attemptId ||
     attempt.promptWordId !== normalized.promptWordId ||
     attempt.selectedWordId !== normalized.selectedWordId
   ) {
-    throw new InvalidGameSessionError(
-      "Snapshot attempt identifiers must already be normalized.",
-    );
+    throw new InvalidGameSessionError("Snapshot attempt identifiers must already be normalized.");
   }
 }
 
@@ -650,18 +617,14 @@ function resolveUngradedWordIds(
   const known = new Set(words.map((word) => word.id));
   for (const wordId of ungradedWordIds) {
     if (!known.has(wordId) || ungraded.has(wordId)) {
-      throw new InvalidGameSessionError(
-        "Ungraded word ids must be distinct session words.",
-      );
+      throw new InvalidGameSessionError("Ungraded word ids must be distinct session words.");
     }
     ungraded.add(wordId);
   }
   return ungraded;
 }
 
-function canonicalizeSnapshot(
-  snapshot: LegacyGameSessionSnapshot,
-): GameSessionSnapshot {
+function canonicalizeSnapshot(snapshot: LegacyGameSessionSnapshot): GameSessionSnapshot {
   return {
     id: snapshot.id,
     visitorId: snapshot.visitorId,
@@ -704,21 +667,14 @@ function assertNotBefore(value: Date, minimum: Date, field: string): void {
   }
 }
 
-function assertWithinTimeline(
-  value: Date,
-  timeline: SnapshotTimeline,
-  field: string,
-): void {
+function assertWithinTimeline(value: Date, timeline: SnapshotTimeline, field: string): void {
   assertNotBefore(value, timeline.startedAt, field);
   if (timeline.finishedAt && value.getTime() > timeline.finishedAt.getTime()) {
     throw new InvalidGameSessionError(`${field} cannot be after the session finish.`);
   }
 }
 
-function sameAttemptInput(
-  attempt: GameAttempt,
-  input: RecordAttemptInput,
-): boolean {
+function sameAttemptInput(attempt: GameAttempt, input: RecordAttemptInput): boolean {
   return (
     attempt.promptWordId === input.promptWordId &&
     attempt.selectedWordId === input.selectedWordId &&

@@ -105,7 +105,11 @@ function readVisitors(database: Database.Database): StoredVisitor[] {
     .all() as StoredVisitor[];
 }
 
-async function insertVisitor(executor: SqlExecutor, visitorId: string, instant: string): Promise<void> {
+async function insertVisitor(
+  executor: SqlExecutor,
+  visitorId: string,
+  instant: string,
+): Promise<void> {
   await executor.run(
     `INSERT INTO "AnonymousVisitor" ("id", "createdAt", "lastSeenAt") VALUES (?, ?, ?)`,
     [visitorId, instant, instant],

@@ -104,9 +104,7 @@ function isForbiddenPackage(specifier: string): boolean {
 }
 
 function moduleSpecifiers(source: string): string[] {
-  const stripped = source
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/(^|[^:])\/\/.*$/gm, "$1");
+  const stripped = source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
   const patterns = [
     /\bfrom\s+["']([^"']+)["']/g,
     /\bimport\s+["']([^"']+)["']/g,

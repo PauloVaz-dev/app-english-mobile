@@ -55,7 +55,11 @@ const WORDS: readonly Word[] = ["one", "two", "three"].map((english, index) => (
   active: true,
 }));
 
-function boardAttempt(attemptId: string, wordId: string, selectedWordId = wordId): PairBoardAttempt {
+function boardAttempt(
+  attemptId: string,
+  wordId: string,
+  selectedWordId = wordId,
+): PairBoardAttempt {
   return {
     attemptId,
     promptWordId: wordId,
@@ -272,7 +276,9 @@ describe("challenge result copy", () => {
   });
 
   it("does not present a tie as a new record", () => {
-    const view = challengeResultView(outcome({ score: 500, previousBest: 500, isNewRecord: false }));
+    const view = challengeResultView(
+      outcome({ score: 500, previousBest: 500, isNewRecord: false }),
+    );
 
     expect(view.isNewRecord).toBe(false);
     expect(view.recordText).toBe("Você empatou com o seu recorde de 500 pontos.");
@@ -280,7 +286,9 @@ describe("challenge result copy", () => {
   });
 
   it("shows the record that still stands below it", () => {
-    const view = challengeResultView(outcome({ score: 300, previousBest: 500, isNewRecord: false }));
+    const view = challengeResultView(
+      outcome({ score: 300, previousBest: 500, isNewRecord: false }),
+    );
 
     expect(view.recordText).toBe("Seu recorde continua 500 pontos.");
   });
@@ -376,7 +384,10 @@ describe("challenge screen controller with a fake composition", () => {
   });
 
   it("shows that time is up before the result, with and without a new record", async () => {
-    for (const result of [outcome(), outcome({ score: 500, previousBest: 500, isNewRecord: false })]) {
+    for (const result of [
+      outcome(),
+      outcome({ score: 500, previousBest: 500, isNewRecord: false }),
+    ]) {
       const port = new FakeScreenPort();
       port.result = result;
       const clock = { now: OPENED_AT };
@@ -497,7 +508,11 @@ describe("challenge screen controller with a fake composition", () => {
 
     await controller.start();
 
-    expect(controller.state).toMatchObject({ kind: "round", challengeId: "challenge-2", deadline: null });
+    expect(controller.state).toMatchObject({
+      kind: "round",
+      challengeId: "challenge-2",
+      deadline: null,
+    });
   });
 });
 

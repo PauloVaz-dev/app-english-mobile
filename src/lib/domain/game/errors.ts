@@ -46,10 +46,7 @@ export class WordAlreadyCompletedError extends GameDomainError {
 
 export class AttemptConflictError extends GameDomainError {
   constructor(attemptId: string) {
-    super(
-      "ATTEMPT_CONFLICT",
-      `Attempt ${attemptId} was already used with different data.`,
-    );
+    super("ATTEMPT_CONFLICT", `Attempt ${attemptId} was already used with different data.`);
   }
 }
 
@@ -79,10 +76,7 @@ export class InvalidBoardError extends GameDomainError {
 
 export class CardNotOnBoardError extends GameDomainError {
   constructor(wordId: string, language: "english" | "portuguese") {
-    super(
-      "CARD_NOT_ON_BOARD",
-      `The ${language} card for word ${wordId} is not visible.`,
-    );
+    super("CARD_NOT_ON_BOARD", `The ${language} card for word ${wordId} is not visible.`);
   }
 }
 
@@ -94,10 +88,7 @@ export class GameSessionNotFoundError extends GameDomainError {
 
 export class GameSessionAlreadyExistsError extends GameDomainError {
   constructor(sessionId: string) {
-    super(
-      "GAME_SESSION_ALREADY_EXISTS",
-      `Game session ${sessionId} already exists.`,
-    );
+    super("GAME_SESSION_ALREADY_EXISTS", `Game session ${sessionId} already exists.`);
   }
 }
 

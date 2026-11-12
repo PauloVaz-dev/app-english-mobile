@@ -174,7 +174,9 @@ export interface ChallengeScreenControllerDependencies {
 
 export function challengeClockView(deadline: Date | null, now: Date): ChallengeClockView {
   const waiting = deadline === null;
-  const remainingMs = waiting ? CHALLENGE_DURATION_MS : Math.max(0, deadline.getTime() - now.getTime());
+  const remainingMs = waiting
+    ? CHALLENGE_DURATION_MS
+    : Math.max(0, deadline.getTime() - now.getTime());
   const seconds = Math.ceil(remainingMs / MS_PER_SECOND);
   const urgent = !waiting && seconds <= CHALLENGE_URGENT_SECONDS;
   return {

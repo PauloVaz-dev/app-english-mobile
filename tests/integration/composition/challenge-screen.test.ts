@@ -64,7 +64,10 @@ async function createLearnerFile(filePath: string): Promise<void> {
   }
 }
 
-async function withScreen(filePath: string, work: (rig: ScreenRig) => Promise<void>): Promise<void> {
+async function withScreen(
+  filePath: string,
+  work: (rig: ScreenRig) => Promise<void>,
+): Promise<void> {
   const database = new Database(filePath);
   try {
     database.exec("PRAGMA foreign_keys = ON");
@@ -120,11 +123,19 @@ async function hitFirstWord(rig: ScreenRig, attemptId: string, offsetMs: number)
   );
 }
 
-const STUDY_TABLES = ["GameSession", "GameSessionWord", "GameAnswer", "LearnerWordProgress"] as const;
+const STUDY_TABLES = [
+  "GameSession",
+  "GameSessionWord",
+  "GameAnswer",
+  "LearnerWordProgress",
+] as const;
 
 function studyTables(database: Database.Database): Record<string, unknown[]> {
   return Object.fromEntries(
-    STUDY_TABLES.map((table) => [table, database.prepare(`SELECT * FROM "${table}" ORDER BY 1`).all()]),
+    STUDY_TABLES.map((table) => [
+      table,
+      database.prepare(`SELECT * FROM "${table}" ORDER BY 1`).all(),
+    ]),
   );
 }
 
@@ -229,7 +240,10 @@ describe("challenge round through the pair board on better-sqlite3", () => {
           kind: "result",
           result: { rows: expect.arrayContaining([{ label: "Pontuação", value: "540" }]) },
         });
-        expect(readSession(rig.database, challengeId)).toMatchObject({ status: "COMPLETED", score: 540 });
+        expect(readSession(rig.database, challengeId)).toMatchObject({
+          status: "COMPLETED",
+          score: 540,
+        });
         expect(studyTables(rig.database)).toEqual(before);
       });
     });
@@ -260,7 +274,10 @@ describe("challenge round through the pair board on better-sqlite3", () => {
         expect(table.board.state.disabled).toBe(true);
 
         await rig.controller.refresh();
-        expect(readSession(rig.database, challengeId)).toMatchObject({ status: "COMPLETED", score: 100 });
+        expect(readSession(rig.database, challengeId)).toMatchObject({
+          status: "COMPLETED",
+          score: 100,
+        });
         expect(storedAttemptIds(rig.database, challengeId)).toEqual(["tap-1"]);
       });
     });
@@ -295,8 +312,14 @@ describe("challenge round through the pair board on better-sqlite3", () => {
 
         rig.clock.now = at(CHALLENGE_DURATION_MS);
         await rig.controller.refresh();
-        expect(rig.controller.state).toMatchObject({ kind: "result", result: { isNewRecord: true } });
-        expect(readSession(rig.database, challengeId)).toMatchObject({ status: "COMPLETED", score: 330 });
+        expect(rig.controller.state).toMatchObject({
+          kind: "result",
+          result: { isNewRecord: true },
+        });
+        expect(readSession(rig.database, challengeId)).toMatchObject({
+          status: "COMPLETED",
+          score: 330,
+        });
         expect(studyTables(rig.database)).toEqual(before);
       });
     });
@@ -418,7 +441,10 @@ describe("challenge screen on better-sqlite3", () => {
 
         expect(rig.controller.state).toMatchObject({
           kind: "result",
-          result: { isNewRecord: false, recordText: "Você empatou com o seu recorde de 100 pontos." },
+          result: {
+            isNewRecord: false,
+            recordText: "Você empatou com o seu recorde de 100 pontos.",
+          },
         });
       });
     });
@@ -434,7 +460,9 @@ describe("challenge screen on better-sqlite3", () => {
         await rig.controller.start();
 
         expect(rig.controller.state).toEqual({ kind: "insufficientCatalog" });
-        const row = rig.database.prepare(`SELECT COUNT(*) AS "total" FROM "ChallengeSession"`).get() as {
+        const row = rig.database
+          .prepare(`SELECT COUNT(*) AS "total" FROM "ChallengeSession"`)
+          .get() as {
           total: number;
         };
         expect(row.total).toBe(0);

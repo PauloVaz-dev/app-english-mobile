@@ -106,7 +106,10 @@ async function useFile(
 
 async function startFreeSession(learner: Learner, id: string): Promise<GameSession> {
   const words = await learner.catalog.drawPracticeWords({ visitorId: VISITOR_ID });
-  const session = GameSession.start({ id, visitorId: VISITOR_ID, words, mode: "FREE" }, learner.clock);
+  const session = GameSession.start(
+    { id, visitorId: VISITOR_ID, words, mode: "FREE" },
+    learner.clock,
+  );
   await learner.repository.create(session);
   return session;
 }
@@ -126,7 +129,10 @@ async function play(learner: Learner, options: PlayOptions): Promise<void> {
   const { repository, clock } = learner;
   const ids = options.words.map(({ id }) => id);
   clock.advance(300);
-  await repository.recordExposures({ sessionId: options.sessionId, wordIds: ids.slice(0, BOARD_SIZE) });
+  await repository.recordExposures({
+    sessionId: options.sessionId,
+    wordIds: ids.slice(0, BOARD_SIZE),
+  });
   for (let index = 0; index < options.correctUpTo; index += 1) {
     const promptWordId = ids[index] ?? "";
     if (options.wrongBeforeCorrect.has(index)) {
@@ -236,7 +242,10 @@ describe("sqlite game session repository", () => {
         const session = await startFreeSession(learner, "session-exposure");
         const ids = session.words.map(({ word }) => word.id);
         learner.clock.advance(200);
-        await learner.repository.recordExposures({ sessionId: session.id, wordIds: ids.slice(0, 5) });
+        await learner.repository.recordExposures({
+          sessionId: session.id,
+          wordIds: ids.slice(0, 5),
+        });
         const firstPresented = readPresentedAt(learner.database, session.id, ids[0] ?? "");
         learner.clock.advance(5_000);
         const repeated = await learner.repository.recordExposures({
@@ -244,7 +253,10 @@ describe("sqlite game session repository", () => {
           wordIds: ids.slice(1, 6),
         });
         expect(repeated.map(({ isNew }) => isNew)).toEqual([false, false, false, false, true]);
-        await learner.repository.recordExposures({ sessionId: session.id, wordIds: [ids[0] ?? ""] });
+        await learner.repository.recordExposures({
+          sessionId: session.id,
+          wordIds: [ids[0] ?? ""],
+        });
         expect(readPresentedAt(learner.database, session.id, ids[0] ?? "")).toBe(firstPresented);
         const progress = readProgress(learner.database, VISITOR_ID);
         expect(progress).toHaveLength(6);
@@ -259,7 +271,10 @@ describe("sqlite game session repository", () => {
           throw new Error("Expected a word seen in the previous session.");
         }
         learner.clock.advance(200);
-        await learner.repository.recordExposures({ sessionId: second.id, wordIds: [shared.word.id] });
+        await learner.repository.recordExposures({
+          sessionId: second.id,
+          wordIds: [shared.word.id],
+        });
         const entry = readProgress(learner.database, VISITOR_ID).find(
           ({ wordId }) => wordId === shared.word.id,
         );
@@ -277,7 +292,10 @@ describe("sqlite game session repository", () => {
         const ids = session.words.map(({ word }) => word.id);
         const promptWordId = ids[0] ?? "";
         learner.clock.advance(200);
-        await learner.repository.recordExposures({ sessionId: session.id, wordIds: ids.slice(0, 5) });
+        await learner.repository.recordExposures({
+          sessionId: session.id,
+          wordIds: ids.slice(0, 5),
+        });
         learner.clock.advance(1_000);
         const wrong = {
           sessionId: session.id,
@@ -318,7 +336,10 @@ describe("sqlite game session repository", () => {
         const ids = session.words.map(({ word }) => word.id);
         const missed = ids[0] ?? "";
         learner.clock.advance(200);
-        await learner.repository.recordExposures({ sessionId: session.id, wordIds: ids.slice(0, 5) });
+        await learner.repository.recordExposures({
+          sessionId: session.id,
+          wordIds: ids.slice(0, 5),
+        });
         for (const [index, selected] of [ids[1], ids[2]].entries()) {
           learner.clock.advance(1_000);
           await learner.repository.recordAttempt({
@@ -331,7 +352,9 @@ describe("sqlite game session repository", () => {
         }
         learner.clock.advance(1_000);
         await learner.repository.abandon(session.id);
-        const entry = readProgress(learner.database, VISITOR_ID).find(({ wordId }) => wordId === missed);
+        const entry = readProgress(learner.database, VISITOR_ID).find(
+          ({ wordId }) => wordId === missed,
+        );
         expect(entry).toMatchObject({
           timesShown: 1,
           correctCount: 0,
@@ -518,7 +541,10 @@ describe("sqlite practice draw", () => {
       await useFile(filePath, async (learner) => {
         const words = await learner.catalog.drawPracticeWords({ visitorId: VISITOR_ID });
         expect(words.map(({ id }) => id).sort()).toEqual(
-          vocabularySeed.slice(12).map(({ id }) => id).sort(),
+          vocabularySeed
+            .slice(12)
+            .map(({ id }) => id)
+            .sort(),
         );
       });
       setInactive(filePath, [vocabularySeed[12]?.id ?? ""]);
@@ -675,9 +701,7 @@ function seedScheduledProgress(filePath: string, wordIds: readonly string[]): vo
 function seedOtherVisitorHardWords(filePath: string, wordIds: readonly string[]): void {
   const database = new Database(filePath);
   try {
-    database
-      .prepare(`INSERT INTO "AnonymousVisitor" ("id") VALUES (?)`)
-      .run(OTHER_VISITOR_ID);
+    database.prepare(`INSERT INTO "AnonymousVisitor" ("id") VALUES (?)`).run(OTHER_VISITOR_ID);
     const insert = database.prepare(
       `INSERT INTO "LearnerWordProgress" (
          "visitorId", "wordId", "timesShown", "correctCount", "wrongCount",

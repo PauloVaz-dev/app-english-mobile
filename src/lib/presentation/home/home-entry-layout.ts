@@ -1,4 +1,7 @@
-import { formatReviewCounts, type HomeReviewSummaryView } from "@/lib/presentation/review/home-review-copy";
+import {
+  formatReviewCounts,
+  type HomeReviewSummaryView,
+} from "@/lib/presentation/review/home-review-copy";
 
 export const HOME_ENTRY_BADGE = "Vocabulário que fica";
 export const HOME_ENTRY_TITLE_LEAD = "Treine palavras.";

@@ -1,7 +1,4 @@
-import {
-  type ChallengePronunciation,
-  INSUFFICIENT_CATALOG,
-} from "@/composition/challenge";
+import { type ChallengePronunciation, INSUFFICIENT_CATALOG } from "@/composition/challenge";
 import type { SessionResultLists } from "@/lib/application/game/session-view";
 import { GameSessionNotFoundError, InvalidWordCatalogError } from "@/lib/domain/game/errors";
 import { GameSession } from "@/lib/domain/game/game-session";
@@ -284,11 +281,7 @@ function toProgress(sessionId: string, outcome: AttemptResult): PracticeProgress
   };
 }
 
-function toResult(
-  session: GameSession,
-  clock: Clock,
-  lists: SessionResultLists,
-): PracticeResult {
+function toResult(session: GameSession, clock: Clock, lists: SessionResultLists): PracticeResult {
   const metrics = session.result ?? session.metrics(clock);
   return {
     sessionId: session.id,

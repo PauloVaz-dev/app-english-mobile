@@ -97,10 +97,7 @@ export interface PairBoardFeedbackView {
   readonly detail: string;
 }
 
-export function createPairBoardState(
-  words: readonly Word[],
-  random: RandomSource,
-): PairBoardState {
+export function createPairBoardState(words: readonly Word[], random: RandomSource): PairBoardState {
   return {
     board: createGameBoard(words, random),
     ready: false,
@@ -217,7 +214,11 @@ function resolveAttempt(
   { promptWordId, selectedWordId }: BoardSelection,
   input: PairBoardSelectInput,
 ): PairBoardTransition {
-  const resolution = resolveBoardSelection(state.board, { promptWordId, selectedWordId }, input.random);
+  const resolution = resolveBoardSelection(
+    state.board,
+    { promptWordId, selectedWordId },
+    input.random,
+  );
   const attempt: PairBoardAttempt = {
     attemptId: input.createAttemptId(),
     promptWordId,
@@ -241,7 +242,13 @@ function resolveAttempt(
       ],
     };
   }
-  return applyHit({ previous: state, cleared, board: resolution.board, attempt, nowMs: input.nowMs });
+  return applyHit({
+    previous: state,
+    cleared,
+    board: resolution.board,
+    attempt,
+    nowMs: input.nowMs,
+  });
 }
 
 interface HitInput {
@@ -319,7 +326,12 @@ function stampEntries(
 }
 
 function clearSelection(state: PairBoardState): PairBoardState {
-  return { ...state, selectedPortugueseId: null, selectedEnglishId: null, attemptStartedAtMs: null };
+  return {
+    ...state,
+    selectedPortugueseId: null,
+    selectedEnglishId: null,
+    attemptStartedAtMs: null,
+  };
 }
 
 function isVisible(board: GameBoard, wordId: string, language: PairBoardLanguage): boolean {

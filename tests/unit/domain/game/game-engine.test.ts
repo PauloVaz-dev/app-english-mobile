@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { CardNotOnBoardError } from "@/lib/domain/game/errors";
-import {
-  createGameBoard,
-  resolveBoardSelection,
-  shuffle,
-} from "@/lib/domain/game/game-engine";
+import { createGameBoard, resolveBoardSelection, shuffle } from "@/lib/domain/game/game-engine";
 
 import { makeWords, SequenceRandom } from "./fixtures";
 
@@ -20,10 +16,7 @@ describe("game-engine", () => {
   });
 
   it("creates independently shuffled columns with at most five unique pairs", () => {
-    const board = createGameBoard(
-      makeWords(),
-      new SequenceRandom([0.15, 0.8, 0.35, 0.65]),
-    );
+    const board = createGameBoard(makeWords(), new SequenceRandom([0.15, 0.8, 0.35, 0.65]));
 
     expect(board.portugueseCards).toHaveLength(5);
     expect(board.englishCards).toHaveLength(5);
@@ -102,11 +95,7 @@ describe("game-engine", () => {
     const board = createGameBoard(makeWords(), random);
 
     expect(() =>
-      resolveBoardSelection(
-        board,
-        { promptWordId: "word-20", selectedWordId: "word-20" },
-        random,
-      ),
+      resolveBoardSelection(board, { promptWordId: "word-20", selectedWordId: "word-20" }, random),
     ).toThrow(CardNotOnBoardError);
   });
 });

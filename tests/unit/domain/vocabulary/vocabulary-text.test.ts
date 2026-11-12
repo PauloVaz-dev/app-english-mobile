@@ -32,20 +32,16 @@ describe("parseVocabularyTexts", () => {
   });
 
   it("rejects an empty English or Portuguese term", () => {
-    expect(() =>
-      parseVocabularyTexts({ english: "   ", portuguese: "maçã" }),
-    ).toThrow(expect.objectContaining({ field: "english", reason: "required" }));
-    expect(() =>
-      parseVocabularyTexts({ english: "apple", portuguese: " " }),
-    ).toThrow(
+    expect(() => parseVocabularyTexts({ english: "   ", portuguese: "maçã" })).toThrow(
+      expect.objectContaining({ field: "english", reason: "required" }),
+    );
+    expect(() => parseVocabularyTexts({ english: "apple", portuguese: " " })).toThrow(
       expect.objectContaining({ field: "portuguese", reason: "required" }),
     );
   });
 
   it("reports every empty term in one failure", () => {
-    expect(() =>
-      parseVocabularyTexts({ english: " ", portuguese: " " }),
-    ).toThrow(
+    expect(() => parseVocabularyTexts({ english: " ", portuguese: " " })).toThrow(
       expect.objectContaining({
         issues: [
           { field: "english", reason: "required" },
@@ -58,17 +54,15 @@ describe("parseVocabularyTexts", () => {
   it("rejects a term or example that is too long", () => {
     const longTerm = "a".repeat(MAX_VOCABULARY_TERM_LENGTH + 1);
     const longExample = "b".repeat(MAX_EXAMPLE_SENTENCE_LENGTH + 1);
-    expect(() =>
-      parseVocabularyTexts({ english: longTerm, portuguese: "maçã" }),
-    ).toThrow(expect.objectContaining({ field: "english", reason: "too_long" }));
+    expect(() => parseVocabularyTexts({ english: longTerm, portuguese: "maçã" })).toThrow(
+      expect.objectContaining({ field: "english", reason: "too_long" }),
+    );
     expect(() =>
       parseVocabularyTexts({
         english: "apple",
         portuguese: "maçã",
         exampleSentence: longExample,
       }),
-    ).toThrow(
-      expect.objectContaining({ field: "exampleSentence", reason: "too_long" }),
-    );
+    ).toThrow(expect.objectContaining({ field: "exampleSentence", reason: "too_long" }));
   });
 });

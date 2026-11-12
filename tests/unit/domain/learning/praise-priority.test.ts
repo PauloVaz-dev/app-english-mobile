@@ -91,8 +91,6 @@ describe("praise priority", () => {
     candidate({ timeToCorrectMs: -1 }),
     candidate({ difficulty: "UNKNOWN" as never }),
   ])("rejects an invalid praise candidate", (input) => {
-    expect(() => selectPraisePriority([input])).toThrow(
-      InvalidReviewCandidateError,
-    );
+    expect(() => selectPraisePriority([input])).toThrow(InvalidReviewCandidateError);
   });
 });

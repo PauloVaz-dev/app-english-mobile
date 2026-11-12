@@ -1,10 +1,7 @@
 import Database from "better-sqlite3";
 import { describe, expect, it } from "vitest";
 
-import {
-  CHALLENGE_DURATION_MS,
-  FixedChallenge,
-} from "@/lib/domain/challenge/fixed-challenge";
+import { CHALLENGE_DURATION_MS, FixedChallenge } from "@/lib/domain/challenge/fixed-challenge";
 import { SessionEndedError } from "@/lib/domain/game/errors";
 import type { Clock } from "@/lib/domain/game/types";
 import { bootstrapEnglishDatabase } from "@/persistence/bootstrap-english-database";
@@ -80,7 +77,11 @@ interface PlayedChallenge {
 
 async function playChallenge(
   repository: SqliteChallengeRepository,
-  input: { readonly id: string; readonly start: string; readonly answers: readonly PlannedAnswer[] },
+  input: {
+    readonly id: string;
+    readonly start: string;
+    readonly answers: readonly PlannedAnswer[];
+  },
 ): Promise<PlayedChallenge> {
   const clock = new FakeClock(input.start);
   const challenge = FixedChallenge.create({ id: input.id, visitorId: VISITOR_ID }, clock);
@@ -105,7 +106,11 @@ async function playChallenge(
 
 async function completeChallenge(
   repository: SqliteChallengeRepository,
-  input: { readonly id: string; readonly start: string; readonly answers: readonly PlannedAnswer[] },
+  input: {
+    readonly id: string;
+    readonly start: string;
+    readonly answers: readonly PlannedAnswer[];
+  },
 ): Promise<FixedChallenge> {
   const { challenge, clock } = await playChallenge(repository, input);
   clock.advance(CHALLENGE_DURATION_MS);
@@ -116,7 +121,11 @@ async function completeChallenge(
 
 async function abandonChallenge(
   repository: SqliteChallengeRepository,
-  input: { readonly id: string; readonly start: string; readonly answers: readonly PlannedAnswer[] },
+  input: {
+    readonly id: string;
+    readonly start: string;
+    readonly answers: readonly PlannedAnswer[];
+  },
 ): Promise<FixedChallenge> {
   const { challenge, clock } = await playChallenge(repository, input);
   clock.advance(1_000);
@@ -342,7 +351,10 @@ describe("sqlite challenge repository", () => {
       await createLearnerFile(filePath);
       await useFile(filePath, async (repository) => {
         const clock = new FakeClock("2026-11-12T12:00:00.000Z");
-        const challenge = FixedChallenge.create({ id: "challenge-ghost", visitorId: VISITOR_ID }, clock);
+        const challenge = FixedChallenge.create(
+          { id: "challenge-ghost", visitorId: VISITOR_ID },
+          clock,
+        );
         expect(await repository.find("challenge-ghost")).toBeNull();
         await expect(repository.save(challenge)).rejects.toBeInstanceOf(ChallengeNotStoredError);
         await expect(repository.recordFor("challenge-ghost")).rejects.toBeInstanceOf(
@@ -394,9 +406,7 @@ describe("sqlite challenge repository", () => {
           { attemptId: "other-attempt", promptWordId: wordAt(0), selectedWordId: wordAt(0) },
           clock,
         );
-        await expect(repository.save(diverged)).rejects.toBeInstanceOf(
-          StoredAttemptsMismatchError,
-        );
+        await expect(repository.save(diverged)).rejects.toBeInstanceOf(StoredAttemptsMismatchError);
         expect(readAttemptCount(database, challenge.id)).toBe(1);
       });
     });
@@ -414,9 +424,9 @@ describe("sqlite challenge repository", () => {
         const version = database.prepare("PRAGMA user_version").get() as { user_version: number };
         expect(version.user_version).toBe(SUPPORTED_SCHEMA_VERSION);
         expect(SUPPORTED_SCHEMA_VERSION).toBe(1);
-        const columns = database
-          .prepare(`PRAGMA table_info("ChallengeSession")`)
-          .all() as { name: string }[];
+        const columns = database.prepare(`PRAGMA table_info("ChallengeSession")`).all() as {
+          name: string;
+        }[];
         expect(columns.map(({ name }) => name)).toEqual(CHALLENGE_SESSION_COLUMNS);
       });
     });

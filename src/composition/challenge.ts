@@ -202,7 +202,10 @@ export function createChallengeComposition(
   };
 }
 
-async function drawWords(catalog: ChallengeWordSource, visitorId: string): Promise<readonly Word[]> {
+async function drawWords(
+  catalog: ChallengeWordSource,
+  visitorId: string,
+): Promise<readonly Word[]> {
   let words: readonly Word[];
   try {
     words = await catalog.drawChallengeWords({ visitorId, limit: CHALLENGE_WORD_LIMIT });

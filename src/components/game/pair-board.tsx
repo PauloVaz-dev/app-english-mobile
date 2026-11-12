@@ -139,7 +139,8 @@ function useReduceMotion(): boolean {
 function PairBoardFeedbackBar({ state }: { state: PairBoardState }) {
   const feedback = pairBoardFeedbackView(state.feedback);
   const correct = feedback?.tone === "correct";
-  const toneStyle = feedback === null ? null : correct ? styles.feedbackCorrect : styles.feedbackIncorrect;
+  const toneStyle =
+    feedback === null ? null : correct ? styles.feedbackCorrect : styles.feedbackIncorrect;
   // Announced by AccessibilityInfo on each attempt; no live region to avoid a double reading.
   return (
     <View style={[styles.feedback, toneStyle]}>

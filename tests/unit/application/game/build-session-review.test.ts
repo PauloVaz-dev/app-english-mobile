@@ -132,11 +132,7 @@ describe("buildSessionReview", () => {
       ],
       progressByWordId: new Map(),
     });
-    expect(result.reviewWords.map(({ wordId }) => wordId)).toEqual([
-      "a",
-      "b",
-      "c",
-    ]);
+    expect(result.reviewWords.map(({ wordId }) => wordId)).toEqual(["a", "b", "c"]);
     expect(result.praiseWords).toEqual([]);
   });
 
@@ -159,11 +155,7 @@ describe("buildSessionReview", () => {
       progressByWordId: new Map(),
     });
     expect(result.reviewWords.map(({ wordId }) => wordId)).toEqual(["review"]);
-    expect(result.praiseWords.map(({ wordId }) => wordId)).toEqual([
-      "alpha",
-      "beta",
-      "gamma",
-    ]);
+    expect(result.praiseWords.map(({ wordId }) => wordId)).toEqual(["alpha", "beta", "gamma"]);
     expect(sharedWordIds(result)).toEqual([]);
   });
 });
@@ -173,7 +165,5 @@ function sharedWordIds(result: {
   readonly praiseWords: readonly { readonly wordId: string }[];
 }): readonly string[] {
   const reviewIds = new Set(result.reviewWords.map(({ wordId }) => wordId));
-  return result.praiseWords
-    .map(({ wordId }) => wordId)
-    .filter((wordId) => reviewIds.has(wordId));
+  return result.praiseWords.map(({ wordId }) => wordId).filter((wordId) => reviewIds.has(wordId));
 }

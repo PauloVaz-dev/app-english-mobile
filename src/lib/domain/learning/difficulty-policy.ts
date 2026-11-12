@@ -1,7 +1,4 @@
-import {
-  calculateProgressMetrics,
-  createLearningProgressSnapshot,
-} from "./progress-metrics";
+import { calculateProgressMetrics, createLearningProgressSnapshot } from "./progress-metrics";
 import type { Difficulty, LearningProgressSnapshot } from "./types";
 
 export const MINIMUM_DIFFICULTY_EXPOSURES = 3;
@@ -10,9 +7,7 @@ export const EASY_ACCURACY_THRESHOLD = 0.9;
 export const EASY_AVERAGE_RESPONSE_TIME_MS = 2_000;
 export const HARD_AVERAGE_RESPONSE_TIME_MS = 5_000;
 
-export function classifyDifficulty(
-  input: LearningProgressSnapshot,
-): Difficulty | null {
+export function classifyDifficulty(input: LearningProgressSnapshot): Difficulty | null {
   const snapshot = createLearningProgressSnapshot(input);
   if (snapshot.timesShown < MINIMUM_DIFFICULTY_EXPOSURES) {
     return null;

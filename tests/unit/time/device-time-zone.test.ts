@@ -204,10 +204,7 @@ class MemoryPreferences implements VisitorPreferences {
 class FakeActivity implements ForegroundActivity {
   private listener: ((nextState: string) => void) | undefined;
 
-  addEventListener(
-    type: "change",
-    listener: (nextState: string) => void,
-  ): { remove(): void } {
+  addEventListener(type: "change", listener: (nextState: string) => void): { remove(): void } {
     if (type !== "change") {
       throw new Error("Unexpected app activity.");
     }

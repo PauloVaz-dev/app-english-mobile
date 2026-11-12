@@ -2,10 +2,7 @@ import { speak } from "expo-speech";
 
 import { logDeviceEvent } from "@/observability/device-event-log";
 
-import {
-  CHALLENGE_SPEECH_FAILED,
-  type ChallengePronunciation,
-} from "@/composition/challenge";
+import { CHALLENGE_SPEECH_FAILED, type ChallengePronunciation } from "@/composition/challenge";
 
 export const PRONUNCIATION_LANGUAGE = "en-US";
 

@@ -234,7 +234,9 @@ function PracticeResult({
         <ResultSection key={section.title} section={section} />
       ))}
       <View style={styles.actions}>
-        {playAgain === undefined ? null : <PrimaryAction action={playAgain} onPress={onPlayAgain} />}
+        {playAgain === undefined ? null : (
+          <PrimaryAction action={playAgain} onPress={onPlayAgain} />
+        )}
         {home === undefined ? null : <HomeAction action={home} />}
       </View>
     </PracticeCanvas>
@@ -282,7 +284,8 @@ function PracticeMessage({ message, alert = false }: { message: string; alert?: 
 }
 
 function PracticeFailure({ retry, onRetry }: { retry: PracticeRetry; onRetry: () => void }) {
-  const message = retry === "start" ? PRACTICE_START_FAILED_MESSAGE : PRACTICE_RESULT_FAILED_MESSAGE;
+  const message =
+    retry === "start" ? PRACTICE_START_FAILED_MESSAGE : PRACTICE_RESULT_FAILED_MESSAGE;
   return (
     <PracticeCanvas>
       <Text accessibilityRole="alert" style={styles.intro}>

@@ -9,10 +9,7 @@ import {
   WordNotInSessionError,
 } from "@/lib/domain/game/errors";
 import { GameSession } from "@/lib/domain/game/game-session";
-import {
-  type GameSessionSnapshot,
-  MAX_RESPONSE_TIME_MS,
-} from "@/lib/domain/game/types";
+import { type GameSessionSnapshot, MAX_RESPONSE_TIME_MS } from "@/lib/domain/game/types";
 
 import { FakeClock, makeWords } from "./fixtures";
 
@@ -42,46 +39,43 @@ describe("GameSession", () => {
     expect(session.wrongAnswers).toBe(0);
   });
 
-  it.each([3, 7, 20])(
-    "starts a review session whose target equals %i words",
-    (count) => {
-      const clock = new FakeClock(new Date("2026-08-22T12:00:00Z"));
-      const session = GameSession.start(
+  it.each([3, 7, 20])("starts a review session whose target equals %i words", (count) => {
+    const clock = new FakeClock(new Date("2026-08-22T12:00:00Z"));
+    const session = GameSession.start(
+      {
+        id: "session-1",
+        visitorId: "visitor-1",
+        mode: "REVIEW",
+        words: makeWords(count),
+      },
+      clock,
+    );
+
+    expect(session.mode).toBe("REVIEW");
+    expect(session.targetWords).toBe(count);
+    expect(session.words).toHaveLength(count);
+    expect(session.words.every((entry) => entry.graded)).toBe(true);
+    expect(session.gradesWord("word-1")).toBe(true);
+
+    for (let index = 1; index <= count; index += 1) {
+      session.recordAttempt(
         {
-          id: "session-1",
-          visitorId: "visitor-1",
-          mode: "REVIEW",
-          words: makeWords(count),
+          attemptId: `attempt-${index}`,
+          promptWordId: `word-${index}`,
+          selectedWordId: `word-${index}`,
+          responseTimeMs: 100,
         },
         clock,
       );
+    }
 
-      expect(session.mode).toBe("REVIEW");
-      expect(session.targetWords).toBe(count);
-      expect(session.words).toHaveLength(count);
-      expect(session.words.every((entry) => entry.graded)).toBe(true);
-      expect(session.gradesWord("word-1")).toBe(true);
-
-      for (let index = 1; index <= count; index += 1) {
-        session.recordAttempt(
-          {
-            attemptId: `attempt-${index}`,
-            promptWordId: `word-${index}`,
-            selectedWordId: `word-${index}`,
-            responseTimeMs: 100,
-          },
-          clock,
-        );
-      }
-
-      expect(session.status).toBe("COMPLETED");
-      expect(session.result).toMatchObject({
-        status: "COMPLETED",
-        targetWords: count,
-        completedWords: count,
-      });
-    },
-  );
+    expect(session.status).toBe("COMPLETED");
+    expect(session.result).toMatchObject({
+      status: "COMPLETED",
+      targetWords: count,
+      completedWords: count,
+    });
+  });
 
   it.each([
     { mode: "FREE" as const, words: makeWords(2) },
@@ -91,10 +85,7 @@ describe("GameSession", () => {
     const clock = new FakeClock(new Date("2026-08-22T12:00:00Z"));
 
     expect(() =>
-      GameSession.start(
-        { id: "session-1", visitorId: "visitor-1", mode, words },
-        clock,
-      ),
+      GameSession.start({ id: "session-1", visitorId: "visitor-1", mode, words }, clock),
     ).toThrow(InvalidGameSessionError);
   });
 
@@ -177,9 +168,7 @@ describe("GameSession", () => {
       clock,
     );
 
-    expect(session.words.find((entry) => entry.word.id === "word-2")?.graded).toBe(
-      false,
-    );
+    expect(session.words.find((entry) => entry.word.id === "word-2")?.graded).toBe(false);
     expect(session.gradesWord("word-1")).toBe(true);
     expect(session.gradesWord("word-2")).toBe(false);
   });
@@ -234,10 +223,7 @@ describe("GameSession", () => {
     const clock = new FakeClock(new Date("2026-08-22T12:00:00Z"));
 
     expect(() =>
-      GameSession.start(
-        { id: "session-1", visitorId: "visitor-1", words },
-        clock,
-      ),
+      GameSession.start({ id: "session-1", visitorId: "visitor-1", words }, clock),
     ).toThrow(InvalidGameSessionError);
   });
 
@@ -501,9 +487,7 @@ describe("GameSession", () => {
       finishedAt: new Date("2026-08-22T12:00:01Z"),
     } as unknown as GameSessionSnapshot;
 
-    expect(() => GameSession.restore(invalidSnapshot)).toThrow(
-      InvalidGameSessionError,
-    );
+    expect(() => GameSession.restore(invalidSnapshot)).toThrow(InvalidGameSessionError);
   });
 
   it("rejects non-canonical aggregate and attempt identifiers", () => {
@@ -535,12 +519,8 @@ describe("GameSession", () => {
       ],
     };
 
-    expect(() => GameSession.restore(paddedSessionId)).toThrow(
-      InvalidGameSessionError,
-    );
-    expect(() => GameSession.restore(duplicateNormalizedAttempts)).toThrow(
-      InvalidGameSessionError,
-    );
+    expect(() => GameSession.restore(paddedSessionId)).toThrow(InvalidGameSessionError);
+    expect(() => GameSession.restore(duplicateNormalizedAttempts)).toThrow(InvalidGameSessionError);
   });
 
   it("rejects a completed word that differs from the correct attempt", () => {
@@ -568,9 +548,7 @@ describe("GameSession", () => {
       })),
     };
 
-    expect(() => GameSession.restore(invalidSnapshot)).toThrow(
-      InvalidGameSessionError,
-    );
+    expect(() => GameSession.restore(invalidSnapshot)).toThrow(InvalidGameSessionError);
   });
 
   it("rejects attempts and completions outside the session timeline", () => {
@@ -596,18 +574,12 @@ describe("GameSession", () => {
     const completionBeforeStart: GameSessionSnapshot = {
       ...snapshot,
       words: snapshot.words.map((entry) =>
-        entry.word.id === "word-1"
-          ? { ...entry, completedAt: beforeStart }
-          : entry,
+        entry.word.id === "word-1" ? { ...entry, completedAt: beforeStart } : entry,
       ),
     };
 
-    expect(() => GameSession.restore(attemptBeforeStart)).toThrow(
-      InvalidGameSessionError,
-    );
-    expect(() => GameSession.restore(completionBeforeStart)).toThrow(
-      InvalidGameSessionError,
-    );
+    expect(() => GameSession.restore(attemptBeforeStart)).toThrow(InvalidGameSessionError);
+    expect(() => GameSession.restore(completionBeforeStart)).toThrow(InvalidGameSessionError);
   });
 
   it("rejects events after an ended session and invalid word sequences", () => {
@@ -635,9 +607,7 @@ describe("GameSession", () => {
     const lateCompletion: GameSessionSnapshot = {
       ...snapshot,
       words: snapshot.words.map((entry) =>
-        entry.word.id === "word-1"
-          ? { ...entry, completedAt: afterFinish }
-          : entry,
+        entry.word.id === "word-1" ? { ...entry, completedAt: afterFinish } : entry,
       ),
     };
     const invalidSequence: GameSessionSnapshot = {
@@ -648,14 +618,8 @@ describe("GameSession", () => {
       })),
     };
 
-    expect(() => GameSession.restore(lateAttempt)).toThrow(
-      InvalidGameSessionError,
-    );
-    expect(() => GameSession.restore(lateCompletion)).toThrow(
-      InvalidGameSessionError,
-    );
-    expect(() => GameSession.restore(invalidSequence)).toThrow(
-      InvalidGameSessionError,
-    );
+    expect(() => GameSession.restore(lateAttempt)).toThrow(InvalidGameSessionError);
+    expect(() => GameSession.restore(lateCompletion)).toThrow(InvalidGameSessionError);
+    expect(() => GameSession.restore(invalidSequence)).toThrow(InvalidGameSessionError);
   });
 });

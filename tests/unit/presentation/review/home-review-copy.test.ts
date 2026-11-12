@@ -53,12 +53,12 @@ describe("home review copy", () => {
       nextReviewAt: new Date("2026-10-02T02:00:00.000Z"),
     };
 
-    expect(
-      toHomeReviewSummaryView(summary, NOW, DEFAULT_TIME_ZONE).nextReviewDetail,
-    ).toBe("próxima revisão em 1 de outubro");
-    expect(
-      toHomeReviewSummaryView(summary, NOW, "Asia/Tokyo").nextReviewDetail,
-    ).toBe("próxima revisão em 2 de outubro");
+    expect(toHomeReviewSummaryView(summary, NOW, DEFAULT_TIME_ZONE).nextReviewDetail).toBe(
+      "próxima revisão em 1 de outubro",
+    );
+    expect(toHomeReviewSummaryView(summary, NOW, "Asia/Tokyo").nextReviewDetail).toBe(
+      "próxima revisão em 2 de outubro",
+    );
   });
 
   it("omits the next date when none is scheduled", () => {

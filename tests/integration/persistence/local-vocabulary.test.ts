@@ -42,7 +42,9 @@ describe("local vocabulary bootstrap", () => {
         expect(readTotal(database, `SELECT COUNT(*) AS "total" FROM "AnonymousVisitor"`)).toBe(
           SINGLE_LEARNER_COUNT,
         );
-        expect(readTotal(database, `SELECT COUNT(*) AS "total" FROM "Word"`)).toBe(INITIAL_WORD_COUNT);
+        expect(readTotal(database, `SELECT COUNT(*) AS "total" FROM "Word"`)).toBe(
+          INITIAL_WORD_COUNT,
+        );
         expect(readActiveWordTotal(database)).toBe(INITIAL_WORD_COUNT);
         expect(readTotal(database, `SELECT COUNT(*) AS "total" FROM "LearnerWordProgress"`)).toBe(
           EMPTY_PROGRESS_COUNT,
@@ -110,7 +112,9 @@ function readTotal(database: Database.Database, statement: string): number {
 }
 
 function readActiveWordTotal(database: Database.Database): number {
-  const row = database.prepare(`SELECT COUNT(*) AS "total" FROM "Word" WHERE "active" = ?`).get(ACTIVE_WORD) as CountRow;
+  const row = database
+    .prepare(`SELECT COUNT(*) AS "total" FROM "Word" WHERE "active" = ?`)
+    .get(ACTIVE_WORD) as CountRow;
   return row.total;
 }
 
@@ -125,7 +129,9 @@ function readWord(database: Database.Database, wordId: string): StoredWord {
 }
 
 function readVisitorIds(database: Database.Database): string[] {
-  const rows = database.prepare(`SELECT "id" FROM "AnonymousVisitor" ORDER BY "id" ASC`).all() as VisitorIdRow[];
+  const rows = database
+    .prepare(`SELECT "id" FROM "AnonymousVisitor" ORDER BY "id" ASC`)
+    .all() as VisitorIdRow[];
   return rows.map((row) => row.id);
 }
 

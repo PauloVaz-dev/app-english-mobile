@@ -13,9 +13,7 @@ interface SamplingRank {
   readonly key: number;
 }
 
-export function resolveSelectionWeight(
-  difficulty: Difficulty | null,
-): number {
+export function resolveSelectionWeight(difficulty: Difficulty | null): number {
   if (difficulty === null) {
     return UNCLASSIFIED_WEIGHT;
   }
@@ -39,9 +37,7 @@ export function selectWeightedWords(input: {
     );
   }
   const ranked = words
-    .map((word) =>
-      rankSelectableWord(word, input.progressByWordId, input.random),
-    )
+    .map((word) => rankSelectableWord(word, input.progressByWordId, input.random))
     .sort(compareSamplingRank);
   return Object.freeze(ranked.slice(0, limit).map(({ word }) => word));
 }
@@ -56,9 +52,7 @@ function rankSelectableWord(
   return { word, key: Math.log(unit) / weight };
 }
 
-function resolveProgressWeight(
-  snapshot: LearningProgressSnapshot | undefined,
-): number {
+function resolveProgressWeight(snapshot: LearningProgressSnapshot | undefined): number {
   if (snapshot === undefined) {
     return UNCLASSIFIED_WEIGHT;
   }
@@ -67,12 +61,7 @@ function resolveProgressWeight(
 
 function readUnitInterval(random: RandomSource): number {
   const value = random.next();
-  if (
-    typeof value !== "number" ||
-    !Number.isFinite(value) ||
-    value < 0 ||
-    value >= 1
-  ) {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0 || value >= 1) {
     throw new InvalidWeightedSelectionError(
       `Random source must return a value from 0 (inclusive) to 1 (exclusive); received ${value}.`,
     );
@@ -94,9 +83,7 @@ function requireDistinctWords(words: readonly Word[]): readonly Word[] {
   const ids = new Set<string>();
   for (const word of words) {
     if (ids.has(word.id)) {
-      throw new InvalidWeightedSelectionError(
-        `Duplicate catalog word: ${word.id}.`,
-      );
+      throw new InvalidWeightedSelectionError(`Duplicate catalog word: ${word.id}.`);
     }
     ids.add(word.id);
   }
@@ -105,9 +92,7 @@ function requireDistinctWords(words: readonly Word[]): readonly Word[] {
 
 function requirePositiveInteger(value: number): number {
   if (!Number.isInteger(value) || value < 1) {
-    throw new InvalidWeightedSelectionError(
-      "Draw limit must be a positive integer.",
-    );
+    throw new InvalidWeightedSelectionError("Draw limit must be a positive integer.");
   }
   return value;
 }

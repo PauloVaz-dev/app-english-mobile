@@ -50,7 +50,9 @@ describe("newer schema version", () => {
       const database = new Database(filePath);
       try {
         const trace = traceBetterSqliteMigration(database);
-        await expect(migrate(trace.executor, trace.runInTransaction)).rejects.toBeInstanceOf(NewerSchemaError);
+        await expect(migrate(trace.executor, trace.runInTransaction)).rejects.toBeInstanceOf(
+          NewerSchemaError,
+        );
         expect(trace.events.some((event) => event.startsWith("transaction:"))).toBe(false);
         expect(trace.events.some((event) => event.includes("CREATE TABLE"))).toBe(false);
       } finally {
@@ -61,7 +63,9 @@ describe("newer schema version", () => {
       try {
         expect(readUserVersion(checked)).toBe(storedVersion);
         expect(checked.prepare(`SELECT "note" FROM "Preserved"`).get()).toEqual({ note: "keep" });
-        expect(checked.prepare(`SELECT name FROM sqlite_master WHERE name = 'Word'`).get()).toBeUndefined();
+        expect(
+          checked.prepare(`SELECT name FROM sqlite_master WHERE name = 'Word'`).get(),
+        ).toBeUndefined();
       } finally {
         checked.close();
       }
@@ -99,7 +103,9 @@ describe("newer schema version", () => {
       vi.mocked(openDatabaseAsync).mockResolvedValue(createFakeConnection(database) as never);
       try {
         await openEnglishDatabase();
-        const visitors = database.prepare(`SELECT "id" FROM "AnonymousVisitor"`).all() as VisitorIdRow[];
+        const visitors = database
+          .prepare(`SELECT "id" FROM "AnonymousVisitor"`)
+          .all() as VisitorIdRow[];
         const words = database.prepare(`SELECT COUNT(*) AS "total" FROM "Word"`).get() as CountRow;
         expect(vocabularySeed).toHaveLength(INITIAL_WORD_COUNT);
         expect(visitors).toEqual([{ id: cryptoDouble.visitorId }]);

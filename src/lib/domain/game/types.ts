@@ -6,11 +6,7 @@ export const SESSION_TARGET_WORDS = MAX_SESSION_WORDS;
 export const BOARD_PAIR_LIMIT = 5;
 export const MAX_BOARD_PAIR_LIMIT = 6;
 export const MAX_RESPONSE_TIME_MS = 3_600_000;
-export const GAME_SESSION_STATUSES = [
-  "ACTIVE",
-  "COMPLETED",
-  "ABANDONED",
-] as const;
+export const GAME_SESSION_STATUSES = ["ACTIVE", "COMPLETED", "ABANDONED"] as const;
 
 export type GameSessionStatus = (typeof GAME_SESSION_STATUSES)[number];
 export type FinishedGameSessionStatus = Exclude<GameSessionStatus, "ACTIVE">;

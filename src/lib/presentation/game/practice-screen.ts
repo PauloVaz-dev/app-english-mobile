@@ -306,7 +306,8 @@ export class PracticeScreenController {
       ...match,
       correctAnswers,
       wrongAnswers: match.wrongAnswers + (attempt.isCorrect ? 0 : 1),
-      stoppedAt: reachedTarget && match.stoppedAt === null ? this.dependencies.now() : match.stoppedAt,
+      stoppedAt:
+        reachedTarget && match.stoppedAt === null ? this.dependencies.now() : match.stoppedAt,
     });
     return this.enqueue({
       kind: "attempt",

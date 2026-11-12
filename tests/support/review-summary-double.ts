@@ -6,10 +6,7 @@ import type {
 import type { Word } from "@/lib/domain/game/types";
 import { DAILY_NEW_WORD_LIMIT, type DueReviewWord } from "@/lib/domain/learning/daily-review-plan";
 import { localDateOf } from "@/lib/domain/learning/local-day";
-import {
-  isReviewDue,
-  type ReviewSchedule,
-} from "@/lib/domain/learning/review-schedule";
+import { isReviewDue, type ReviewSchedule } from "@/lib/domain/learning/review-schedule";
 import type { ScheduledWordRef } from "@/lib/domain/learning/word-selection";
 
 interface StoredWord {

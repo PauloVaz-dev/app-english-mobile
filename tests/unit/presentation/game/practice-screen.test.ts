@@ -60,7 +60,13 @@ function outcome(overrides: Partial<PracticeOutcome> = {}): PracticeOutcome {
     averageResponseTimeMs: 1_640,
     reviewWords: [reviewWord()],
     praiseWords: [
-      reviewWord({ wordId: "w2", english: "bird", portuguese: "pássaro", wrongAnswers: 0, timeToCorrectMs: 1_200 }),
+      reviewWord({
+        wordId: "w2",
+        english: "bird",
+        portuguese: "pássaro",
+        wrongAnswers: 0,
+        timeToCorrectMs: 1_200,
+      }),
     ],
     ...overrides,
   };
@@ -314,7 +320,10 @@ describe("practice screen controller with a fake composition", () => {
     await playToTheEnd(controller);
 
     expect(port.calls).toContain("result:practice-1");
-    expect(controller.state).toEqual({ kind: "result", result: practiceResultView(port.storedOutcome) });
+    expect(controller.state).toEqual({
+      kind: "result",
+      result: practiceResultView(port.storedOutcome),
+    });
     expect(port.calls.some((call) => call.startsWith("abandon"))).toBe(false);
   });
 
@@ -568,7 +577,9 @@ describe("practice route boundary", () => {
 
   it("does not decide hits outside the board rules", () => {
     for (const file of screenFiles) {
-      expect(read(file)).not.toMatch(/promptWordId\s*===|===\s*\w*\.?selectedWordId|resolveBoardSelection/);
+      expect(read(file)).not.toMatch(
+        /promptWordId\s*===|===\s*\w*\.?selectedWordId|resolveBoardSelection/,
+      );
     }
   });
 

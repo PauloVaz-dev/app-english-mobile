@@ -1,7 +1,10 @@
 import Database from "better-sqlite3";
 import { describe, expect, it } from "vitest";
 
-import { createWordRegistration, type WordRegistrationEvent } from "@/composition/word-registration";
+import {
+  createWordRegistration,
+  type WordRegistrationEvent,
+} from "@/composition/word-registration";
 import type { Clock } from "@/lib/domain/game/types";
 import {
   WORD_FORM_FAILED_MESSAGE,
@@ -82,7 +85,12 @@ function countWords(database: Database.Database): number {
   return row.total;
 }
 
-async function type(controller: WordFormController, english: string, portuguese: string, sentence = "") {
+async function type(
+  controller: WordFormController,
+  english: string,
+  portuguese: string,
+  sentence = "",
+) {
   controller.change("english", english);
   controller.change("portuguese", portuguese);
   controller.change("exampleSentence", sentence);
@@ -99,7 +107,9 @@ describe("word form against SQLite", () => {
         "Palavra adicionada: Window — janela.",
       );
       const stored = database
-        .prepare(`SELECT "english", "portuguese", "exampleSentence", "active" FROM "Word" WHERE "id" = ?`)
+        .prepare(
+          `SELECT "english", "portuguese", "exampleSentence", "active" FROM "Word" WHERE "id" = ?`,
+        )
         .get("registered-1");
       expect(stored).toEqual({
         english: "Window",

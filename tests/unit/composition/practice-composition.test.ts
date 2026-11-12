@@ -206,11 +206,7 @@ function harness(
   return { clock, catalog, store, speech, events, composition };
 }
 
-function attemptOf(
-  attemptId: string,
-  promptWordId: string,
-  selectedWordId: string = promptWordId,
-) {
+function attemptOf(attemptId: string, promptWordId: string, selectedWordId: string = promptWordId) {
   return { sessionId: "session-1", attemptId, promptWordId, selectedWordId, responseTimeMs: 1_200 };
 }
 

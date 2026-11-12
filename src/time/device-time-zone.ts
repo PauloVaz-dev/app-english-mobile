@@ -28,10 +28,7 @@ export interface ForegroundSubscription {
 }
 
 export interface ForegroundActivity {
-  addEventListener(
-    type: "change",
-    listener: (nextState: string) => void,
-  ): ForegroundSubscription;
+  addEventListener(type: "change", listener: (nextState: string) => void): ForegroundSubscription;
 }
 
 interface DeviceTimeZoneSave {

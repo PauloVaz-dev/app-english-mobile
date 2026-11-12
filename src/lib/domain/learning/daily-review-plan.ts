@@ -72,7 +72,10 @@ function admitNewWords(input: {
   return eligible.slice(0, Math.min(input.openSlots, input.newWordQuota));
 }
 
-function freezePlan(dueWords: readonly DueReviewWord[], newWordIds: readonly string[]): DailyReviewPlan {
+function freezePlan(
+  dueWords: readonly DueReviewWord[],
+  newWordIds: readonly string[],
+): DailyReviewPlan {
   const typingWordIds = dueWords
     .filter((item) => item.schedule.state === "REVIEW")
     .map((item) => item.wordId);

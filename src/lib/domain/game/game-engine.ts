@@ -1,14 +1,5 @@
-import {
-  CardNotOnBoardError,
-  InvalidBoardError,
-  InvalidRandomValueError,
-} from "./errors";
-import {
-  BOARD_PAIR_LIMIT,
-  MAX_BOARD_PAIR_LIMIT,
-  type RandomSource,
-  type Word,
-} from "./types";
+import { CardNotOnBoardError, InvalidBoardError, InvalidRandomValueError } from "./errors";
+import { BOARD_PAIR_LIMIT, MAX_BOARD_PAIR_LIMIT, type RandomSource, type Word } from "./types";
 
 export interface GameCard {
   readonly wordId: string;
@@ -34,10 +25,7 @@ export interface BoardSelectionResult {
   readonly board: GameBoard;
 }
 
-export function shuffle<T>(
-  values: readonly T[],
-  random: RandomSource,
-): T[] {
+export function shuffle<T>(values: readonly T[], random: RandomSource): T[] {
   const result = [...values];
   for (let index = result.length - 1; index > 0; index -= 1) {
     const randomValue = random.next();
@@ -78,11 +66,7 @@ export function resolveBoardSelection(
   selection: BoardSelection,
   random: RandomSource,
 ): BoardSelectionResult {
-  assertVisible(
-    board.portugueseCards,
-    selection.promptWordId,
-    "portuguese",
-  );
+  assertVisible(board.portugueseCards, selection.promptWordId, "portuguese");
   assertVisible(board.englishCards, selection.selectedWordId, "english");
   const isCorrect = selection.promptWordId === selection.selectedWordId;
   if (!isCorrect) {
@@ -135,9 +119,7 @@ function buildBoard(
   );
   if (
     englishCards.length > 1 &&
-    englishCards.every(
-      (card, index) => card.wordId === portugueseCards[index].wordId,
-    )
+    englishCards.every((card, index) => card.wordId === portugueseCards[index].wordId)
   ) {
     englishCards = [...englishCards.slice(1), englishCards[0]];
   }
@@ -184,11 +166,7 @@ function assertVisible(
 }
 
 function validatePairLimit(pairLimit: number): void {
-  if (
-    !Number.isInteger(pairLimit) ||
-    pairLimit < 1 ||
-    pairLimit > MAX_BOARD_PAIR_LIMIT
-  ) {
+  if (!Number.isInteger(pairLimit) || pairLimit < 1 || pairLimit > MAX_BOARD_PAIR_LIMIT) {
     throw new InvalidBoardError(
       `Pair limit must be an integer between 1 and ${MAX_BOARD_PAIR_LIMIT}.`,
     );

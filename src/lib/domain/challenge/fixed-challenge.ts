@@ -158,9 +158,7 @@ export class FixedChallenge {
   }
 
   get deadline(): Date | null {
-    return this.startTime
-      ? new Date(this.startTime.getTime() + CHALLENGE_DURATION_MS)
-      : null;
+    return this.startTime ? new Date(this.startTime.getTime() + CHALLENGE_DURATION_MS) : null;
   }
 
   get attempts(): readonly ChallengeAttempt[] {
@@ -233,8 +231,7 @@ export class FixedChallenge {
     const now = readClock(clock);
     const deadline = this.deadline;
     this.currentStatus = "ABANDONED";
-    this.finishTime =
-      deadline !== null && deadline.getTime() < now.getTime() ? deadline : now;
+    this.finishTime = deadline !== null && deadline.getTime() < now.getTime() ? deadline : now;
   }
 
   private assertRestoredTimes(): void {
@@ -314,11 +311,7 @@ function normalizeAttempt(input: ChallengeAttemptInput): ChallengeAttemptInput {
   return {
     attemptId: requireText(input.attemptId, "attemptId", InvalidAttemptError),
     promptWordId: requireText(input.promptWordId, "promptWordId", InvalidAttemptError),
-    selectedWordId: requireText(
-      input.selectedWordId,
-      "selectedWordId",
-      InvalidAttemptError,
-    ),
+    selectedWordId: requireText(input.selectedWordId, "selectedWordId", InvalidAttemptError),
   };
 }
 

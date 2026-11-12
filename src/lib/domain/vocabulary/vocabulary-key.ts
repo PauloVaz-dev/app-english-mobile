@@ -7,9 +7,5 @@ export function vocabularyKey(english: string, portuguese: string): string {
 }
 
 function foldVocabularyText(value: string): string {
-  return value
-    .normalize("NFKD")
-    .replace(COMBINING_MARKS, "")
-    .toLowerCase()
-    .replace(WHITESPACE, "");
+  return value.normalize("NFKD").replace(COMBINING_MARKS, "").toLowerCase().replace(WHITESPACE, "");
 }

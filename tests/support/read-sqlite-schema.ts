@@ -50,7 +50,9 @@ export function readTableNames(database: Database.Database): string[] {
 }
 
 export function readColumns(database: Database.Database, tableName: string): ColumnExpectation[] {
-  const rows = database.prepare(`PRAGMA table_info(${quoteIdentifier(tableName)})`).all() as TableInfoRow[];
+  const rows = database
+    .prepare(`PRAGMA table_info(${quoteIdentifier(tableName)})`)
+    .all() as TableInfoRow[];
   return rows.map((row) => ({
     name: row.name,
     type: row.type,
@@ -97,9 +99,7 @@ function readIndexColumns(database: Database.Database, indexName: string): strin
   const rows = database
     .prepare(`PRAGMA index_info(${quoteIdentifier(indexName)})`)
     .all() as IndexInfoRow[];
-  return [...rows]
-    .sort((left, right) => left.seqno - right.seqno)
-    .map((row) => row.name);
+  return [...rows].sort((left, right) => left.seqno - right.seqno).map((row) => row.name);
 }
 
 function quoteIdentifier(name: string): string {

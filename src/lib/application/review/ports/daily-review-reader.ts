@@ -15,16 +15,8 @@ export interface PlanInputs {
 }
 
 export interface DailyReviewReader {
-  summary(
-    visitorId: string,
-    now: Date,
-    timeZone: string,
-  ): Promise<DailyReviewSummary>;
-  loadPlanInputs(
-    visitorId: string,
-    now: Date,
-    timeZone: string,
-  ): Promise<PlanInputs>;
+  summary(visitorId: string, now: Date, timeZone: string): Promise<DailyReviewSummary>;
+  loadPlanInputs(visitorId: string, now: Date, timeZone: string): Promise<PlanInputs>;
   findActiveWords(wordIds: readonly string[]): Promise<readonly Word[]>;
   listStudied(visitorId: string): Promise<readonly ScheduledWordRef[]>;
 }

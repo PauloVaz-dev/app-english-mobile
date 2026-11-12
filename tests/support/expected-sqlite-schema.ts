@@ -137,7 +137,10 @@ export const EXPECTED_TABLES: Record<string, TableExpectation> = {
     foreignKeys: [],
     indexes: [
       definePlainIndex("Word_active_idx", ["active"]),
-      defineUniqueIndex("Word_englishNormalized_portugueseNormalized_key", ["englishNormalized", "portugueseNormalized"]),
+      defineUniqueIndex("Word_englishNormalized_portugueseNormalized_key", [
+        "englishNormalized",
+        "portugueseNormalized",
+      ]),
     ],
   },
   GameSession: {
@@ -227,7 +230,10 @@ export const EXPECTED_TABLES: Record<string, TableExpectation> = {
       defineForeignKey("wordId", "Word", RESTRICT),
     ],
     indexes: [
-      definePlainIndex("LearnerWordProgress_visitorId_nextReviewAt_idx", ["visitorId", "nextReviewAt"]),
+      definePlainIndex("LearnerWordProgress_visitorId_nextReviewAt_idx", [
+        "visitorId",
+        "nextReviewAt",
+      ]),
       definePlainIndex("LearnerWordProgress_wordId_idx", ["wordId"]),
     ],
   },
@@ -247,7 +253,11 @@ export const EXPECTED_TABLES: Record<string, TableExpectation> = {
     ],
     foreignKeys: [defineForeignKey("visitorId", "AnonymousVisitor", RESTRICT)],
     indexes: [
-      definePlainIndex("ChallengeSession_visitorId_level_status_idx", ["visitorId", "level", "status"]),
+      definePlainIndex("ChallengeSession_visitorId_level_status_idx", [
+        "visitorId",
+        "level",
+        "status",
+      ]),
     ],
   },
   ChallengeSessionWord: {

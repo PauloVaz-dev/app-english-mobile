@@ -44,9 +44,7 @@ describe("study rule boundary", () => {
       mkdirSync(rules);
       writeFileSync(path.join(rules, "entry.ts"), 'import { value } from "../outside";\n');
       writeFileSync(path.join(root, "outside.ts"), 'import "@prisma/client";\n');
-      expect(scanStudyRuleDirectory(rules, null)).toEqual([
-        "../outside.ts imports @prisma/client",
-      ]);
+      expect(scanStudyRuleDirectory(rules, null)).toEqual(["../outside.ts imports @prisma/client"]);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -132,7 +130,11 @@ function isForbiddenPackage(specifier: string): boolean {
   });
 }
 
-function resolveLocalModule(fromFile: string, specifier: string, aliasRoot: string | null): string | null {
+function resolveLocalModule(
+  fromFile: string,
+  specifier: string,
+  aliasRoot: string | null,
+): string | null {
   if (specifier.startsWith(".")) {
     return resolveExisting(path.resolve(path.dirname(fromFile), specifier));
   }

@@ -20,7 +20,13 @@ interface Recorded {
 function setup() {
   let nowMs = 0;
   let attemptCounter = 0;
-  const recorded: Recorded = { ready: [], entered: [], attempts: [], announcements: [], states: [] };
+  const recorded: Recorded = {
+    ready: [],
+    entered: [],
+    attempts: [],
+    announcements: [],
+    states: [],
+  };
   const controller = new PairBoardController({
     words: makeWords(20),
     random: new SequenceRandom([0.42, 0.13, 0.77, 0.58, 0.05, 0.91, 0.36, 0.64, 0.27, 0.83]),

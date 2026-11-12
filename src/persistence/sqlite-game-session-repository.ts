@@ -504,10 +504,7 @@ function assertStoredCounters(row: GameSessionRow, session: GameSession): void {
   }
 }
 
-function assertSameAttemptOwner(
-  owner: AnswerOwnerRow | null,
-  input: RecordGameAttemptInput,
-): void {
+function assertSameAttemptOwner(owner: AnswerOwnerRow | null, input: RecordGameAttemptInput): void {
   if (owner === null) {
     return;
   }

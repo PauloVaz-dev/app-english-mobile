@@ -1,17 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { InvalidReviewScheduleError } from "@/lib/domain/learning/errors";
-import {
-  isValidTimeZone,
-  localDateOf,
-  startOfLocalDay,
-} from "@/lib/domain/learning/local-day";
+import { isValidTimeZone, localDateOf, startOfLocalDay } from "@/lib/domain/learning/local-day";
 
 describe("startOfLocalDay", () => {
   it("returns local midnight of the same day by default", () => {
-    expect(
-      startOfLocalDay(new Date("2026-09-24T15:45:00.000Z"), "America/Sao_Paulo"),
-    ).toEqual(new Date("2026-09-24T03:00:00.000Z"));
+    expect(startOfLocalDay(new Date("2026-09-24T15:45:00.000Z"), "America/Sao_Paulo")).toEqual(
+      new Date("2026-09-24T03:00:00.000Z"),
+    );
   });
 
   it("uses the learner's date when it differs from the UTC date", () => {
@@ -26,9 +22,9 @@ describe("startOfLocalDay", () => {
   });
 
   it("crosses month boundaries and time zones east of UTC", () => {
-    expect(
-      startOfLocalDay(new Date("2026-09-30T20:00:00.000Z"), "Asia/Tokyo", 1),
-    ).toEqual(new Date("2026-10-01T15:00:00.000Z"));
+    expect(startOfLocalDay(new Date("2026-09-30T20:00:00.000Z"), "Asia/Tokyo", 1)).toEqual(
+      new Date("2026-10-01T15:00:00.000Z"),
+    );
   });
 
   it("follows daylight saving changes", () => {
@@ -42,12 +38,8 @@ describe("startOfLocalDay", () => {
   it("rejects unknown time zones and fractional offsets", () => {
     const at = new Date("2026-09-24T12:00:00.000Z");
 
-    expect(() => startOfLocalDay(at, "Nowhere/City")).toThrow(
-      InvalidReviewScheduleError,
-    );
-    expect(() => startOfLocalDay(at, "UTC", 1.5)).toThrow(
-      InvalidReviewScheduleError,
-    );
+    expect(() => startOfLocalDay(at, "Nowhere/City")).toThrow(InvalidReviewScheduleError);
+    expect(() => startOfLocalDay(at, "UTC", 1.5)).toThrow(InvalidReviewScheduleError);
   });
 });
 
@@ -62,12 +54,8 @@ describe("localDateOf", () => {
   });
 
   it("returns the Tokyo calendar day across local midnight", () => {
-    expect(localDateOf(new Date("2026-09-24T14:59:59.999Z"), "Asia/Tokyo")).toBe(
-      "2026-09-24",
-    );
-    expect(localDateOf(new Date("2026-09-24T15:00:00.000Z"), "Asia/Tokyo")).toBe(
-      "2026-09-25",
-    );
+    expect(localDateOf(new Date("2026-09-24T14:59:59.999Z"), "Asia/Tokyo")).toBe("2026-09-24");
+    expect(localDateOf(new Date("2026-09-24T15:00:00.000Z"), "Asia/Tokyo")).toBe("2026-09-25");
   });
 
   it("pads month and day and follows the zone of the same instant", () => {
@@ -77,9 +65,7 @@ describe("localDateOf", () => {
     expect(localDateOf(new Date("2026-09-24T15:00:00.000Z"), "America/Sao_Paulo")).toBe(
       "2026-09-24",
     );
-    expect(localDateOf(new Date("2026-09-24T15:00:00.000Z"), "Asia/Tokyo")).toBe(
-      "2026-09-25",
-    );
+    expect(localDateOf(new Date("2026-09-24T15:00:00.000Z"), "Asia/Tokyo")).toBe("2026-09-25");
   });
 
   it("rejects an invalid instant and an unknown time zone", () => {

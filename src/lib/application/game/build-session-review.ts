@@ -19,22 +19,13 @@ export interface SessionReviewAttemptFact {
 export interface BuildSessionReviewInput {
   readonly words: readonly SessionReviewWordFact[];
   readonly attempts: readonly SessionReviewAttemptFact[];
-  readonly progressByWordId: ReadonlyMap<
-    string,
-    LearningProgressSnapshot | null | undefined
-  >;
+  readonly progressByWordId: ReadonlyMap<string, LearningProgressSnapshot | null | undefined>;
 }
 
-export function buildSessionReview(
-  input: BuildSessionReviewInput,
-): SessionResultLists {
+export function buildSessionReview(input: BuildSessionReviewInput): SessionResultLists {
   const candidates = input.words.map((word) => {
-    const wordAttempts = input.attempts.filter(
-      (attempt) => attempt.promptWordId === word.wordId,
-    );
-    const wrongAnswers = wordAttempts.filter(
-      (attempt) => !attempt.isCorrect,
-    ).length;
+    const wordAttempts = input.attempts.filter((attempt) => attempt.promptWordId === word.wordId);
+    const wrongAnswers = wordAttempts.filter((attempt) => !attempt.isCorrect).length;
     const correctAttempt = wordAttempts.find((attempt) => attempt.isCorrect);
     const progress = input.progressByWordId.get(word.wordId) ?? null;
     return {

@@ -3,11 +3,7 @@ export const MAX_EXAMPLE_SENTENCE_LENGTH = 240;
 
 const REPEATED_SPACES = /\s+/g;
 
-export const VOCABULARY_TEXT_FIELDS = [
-  "english",
-  "portuguese",
-  "exampleSentence",
-] as const;
+export const VOCABULARY_TEXT_FIELDS = ["english", "portuguese", "exampleSentence"] as const;
 
 export type VocabularyTextField = (typeof VOCABULARY_TEXT_FIELDS)[number];
 export type VocabularyTextFailure = "required" | "too_long";

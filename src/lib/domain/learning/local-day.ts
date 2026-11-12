@@ -27,11 +27,7 @@ export function localDateOf(instant: Date, timeZone: string): string {
  * `instant` begins in `timeZone`. Review dates are stored as these instants so
  * that "due today" follows the learner's calendar, not the server's.
  */
-export function startOfLocalDay(
-  instant: Date,
-  timeZone: string,
-  days = 0,
-): Date {
+export function startOfLocalDay(instant: Date, timeZone: string, days = 0): Date {
   if (!Number.isInteger(days)) {
     throw new InvalidReviewScheduleError("Day offset must be an integer.");
   }

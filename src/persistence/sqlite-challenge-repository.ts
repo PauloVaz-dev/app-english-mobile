@@ -201,9 +201,7 @@ export class SqliteChallengeRepository {
   }
 
   async bestCompletedScore(visitorId: string): Promise<number | null> {
-    const rows = await this.executor.getAll<BestScoreRow>(SELECT_BEST_COMPLETED_SCORE, [
-      visitorId,
-    ]);
+    const rows = await this.executor.getAll<BestScoreRow>(SELECT_BEST_COMPLETED_SCORE, [visitorId]);
     return rows[0]?.best ?? null;
   }
 

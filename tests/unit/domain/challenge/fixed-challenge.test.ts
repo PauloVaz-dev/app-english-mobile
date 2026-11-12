@@ -9,10 +9,7 @@ import {
   bestCompletedScore,
   compareWithRecord,
 } from "@/lib/domain/challenge/fixed-challenge";
-import {
-  pointsForStreak,
-  scoreOutcomes,
-} from "@/lib/domain/challenge/scoring";
+import { pointsForStreak, scoreOutcomes } from "@/lib/domain/challenge/scoring";
 import {
   AttemptConflictError,
   InvalidGameSessionError,
@@ -40,10 +37,7 @@ class FakeClock implements Clock {
 
 function setup() {
   const clock = new FakeClock(START);
-  const challenge = FixedChallenge.create(
-    { id: "challenge-1", visitorId: "visitor-1" },
-    clock,
-  );
+  const challenge = FixedChallenge.create({ id: "challenge-1", visitorId: "visitor-1" }, clock);
   return { clock, challenge };
 }
 
@@ -188,9 +182,7 @@ describe("FixedChallenge", () => {
 
     expect(replay).toEqual(first);
     expect(challenge.score.score).toBe(100);
-    expect(() => answer(challenge, clock, false, "same")).toThrow(
-      AttemptConflictError,
-    );
+    expect(() => answer(challenge, clock, false, "same")).toThrow(AttemptConflictError);
   });
 
   it("completes when expired at the exact deadline", () => {
@@ -265,9 +257,7 @@ describe("in-memory challenge round", () => {
     const { clock, challenge } = setup();
     clock.advance(800);
     challenge.begin(clock);
-    const outcomes = [
-      true, true, false, true, true, true, true, true, true, true, false, true,
-    ];
+    const outcomes = [true, true, false, true, true, true, true, true, true, true, false, true];
 
     for (const isCorrect of outcomes) {
       clock.advance(4_000);

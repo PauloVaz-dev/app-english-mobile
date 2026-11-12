@@ -1,8 +1,5 @@
 import { InvalidReviewCandidateError } from "./errors";
-import {
-  collectDistinctCandidates,
-  compareReviewText,
-} from "./review-candidate";
+import { collectDistinctCandidates, compareReviewText } from "./review-candidate";
 import type { ReviewCandidate } from "./types";
 
 export const DEFAULT_PRAISE_LIMIT = 3;
@@ -26,31 +23,18 @@ function isEligibleForPraise(candidate: ReviewCandidate): boolean {
   );
 }
 
-function comparePraisePriority(
-  left: ReviewCandidate,
-  right: ReviewCandidate,
-): number {
-  const timeComparison = compareMeasuredTimeAscending(
-    left.timeToCorrectMs,
-    right.timeToCorrectMs,
-  );
+function comparePraisePriority(left: ReviewCandidate, right: ReviewCandidate): number {
+  const timeComparison = compareMeasuredTimeAscending(left.timeToCorrectMs, right.timeToCorrectMs);
   if (timeComparison !== 0) {
     return timeComparison;
   }
   const englishComparison = compareReviewText(left.english, right.english);
-  return englishComparison !== 0
-    ? englishComparison
-    : compareReviewText(left.wordId, right.wordId);
+  return englishComparison !== 0 ? englishComparison : compareReviewText(left.wordId, right.wordId);
 }
 
-function compareMeasuredTimeAscending(
-  left: number | null,
-  right: number | null,
-): number {
+function compareMeasuredTimeAscending(left: number | null, right: number | null): number {
   if (left === null || right === null) {
-    throw new InvalidReviewCandidateError(
-      "Praise ranking requires a measured time.",
-    );
+    throw new InvalidReviewCandidateError("Praise ranking requires a measured time.");
   }
   return left - right;
 }

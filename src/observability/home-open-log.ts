@@ -5,9 +5,7 @@ export const HOME_SUMMARY_FAILED = "home.summary_failed";
 const HOME_OPEN_FAILURE = "Home opening failed.";
 
 export type HomeOpenFailure =
-  | typeof HOME_MIGRATION_FAILED
-  | typeof HOME_SEED_FAILED
-  | typeof HOME_SUMMARY_FAILED;
+  typeof HOME_MIGRATION_FAILED | typeof HOME_SEED_FAILED | typeof HOME_SUMMARY_FAILED;
 
 export type HomeEventRecorder = (event: HomeOpenFailure) => void;
 
