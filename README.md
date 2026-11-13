@@ -1,56 +1,65 @@
-# Welcome to your Expo app 👋
+# app-english-mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicativo local de vocabulário em inglês (treino, desafio, cadastro e revisão diária), feito com Expo, Expo Router, NativeWind e `expo-sqlite`.
 
-## Get started
+O app usa bibliotecas com código nativo, então roda em um **development build** (`expo-dev-client`), não no Expo Go.
 
-1. Install dependencies
+## Pré-requisitos
 
-   ```bash
-   npm install
-   ```
+- Node.js e npm
+- Android Studio com Android SDK (variável `ANDROID_HOME` configurada)
+- Um aparelho Android:
+  - **Celular físico:** ative *Opções do desenvolvedor* → *Depuração USB*, conecte pelo cabo e autorize o computador;
+  - **Emulador:** Android Studio → *Device Manager* → *Create Virtual Device* e inicie o emulador.
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Confira se o aparelho aparece:
 
 ```bash
-npm run reset-project
+adb devices
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+## Instalação
 
-### Other setup steps
+```bash
+npm install
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Rodando no Android
 
-## Learn more
+Compila o app nativo, instala no aparelho/emulador e inicia o Metro:
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+npx expo run:android   # ou: npm run android
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+A primeira compilação leva alguns minutos. Depois, se nada nativo mudou, basta subir o servidor com o app já instalado:
 
-## Join the community
+```bash
+npx expo start         # ou: npm start
+```
 
-Join our community of developers creating universal apps.
+A pasta `android/` é gerada automaticamente (Continuous Native Generation) e não vai para o git. Não edite à mão — configure pelo `app.json` e config plugins.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Qualidade
+
+```bash
+npm run lint           # npx expo lint
+npm run typecheck      # npx tsc --noEmit
+npm test               # vitest run
+npx expo-doctor        # diagnostica dependências e configuração
+```
+
+## Dependências
+
+Sempre instale pacotes com o Expo, para obter versões compatíveis com o SDK:
+
+```bash
+npx expo install <pacote>
+npx expo install --fix   # corrige versões incompatíveis
+```
+
+## Build na nuvem (EAS)
+
+```bash
+npx eas-cli@latest build --profile development --platform android
+```
