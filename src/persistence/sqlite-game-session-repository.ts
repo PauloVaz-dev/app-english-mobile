@@ -28,15 +28,16 @@ import {
   applyAttemptToProgress,
   assertAttemptProgressAllowed,
 } from "@/lib/domain/learning/attempt-progress";
+import { applyMatchingReview } from "@/lib/domain/learning/matching-review";
 import { createLearningProgressSnapshot } from "@/lib/domain/learning/progress-metrics";
+import type { ReviewSchedule } from "@/lib/domain/learning/review-schedule";
 import type { LearningProgressSnapshot } from "@/lib/domain/learning/types";
 import type { RunInTransaction, SqlExecutor } from "@/persistence/sql-executor";
-
-/**
- * Only the free practice is stored here. A REVIEW session also writes the
- * review agenda, which belongs to the daily review feature.
- */
-const STORED_MODE: GameSessionMode = "FREE";
+import {
+  toReviewScheduleFromRow,
+  toSchedulePersistence,
+  type ReviewScheduleRow,
+} from "@/persistence/sqlite-daily-review-reader";
 
 const INSERT_SESSION = `
 INSERT INTO "GameSession" (
@@ -135,6 +136,37 @@ SET "correctCount" = ?, "wrongCount" = ?, "totalCorrectResponseTimeMs" = ?, "upd
 WHERE "visitorId" = ? AND "wordId" = ?
 `;
 
+const SELECT_REVIEW_TIME_ZONE = `
+SELECT "timeZone" AS "timeZone"
+FROM "ReviewSession"
+WHERE "gameSessionId" = ?
+`;
+
+const SELECT_MATCHING_SCHEDULE = `
+SELECT
+  "reviewState" AS "reviewState",
+  "reviewRepetitions" AS "reviewRepetitions",
+  "reviewLapses" AS "reviewLapses",
+  "reviewIntervalDays" AS "reviewIntervalDays",
+  "reviewEaseFactor" AS "reviewEaseFactor",
+  "nextReviewAt" AS "nextReviewAt"
+FROM "LearnerWordProgress"
+WHERE "visitorId" = ? AND "wordId" = ?
+`;
+
+const UPDATE_MATCHING_SCHEDULE = `
+UPDATE "LearnerWordProgress"
+SET "lastReviewedAt" = ?,
+    "nextReviewAt" = ?,
+    "reviewRepetitions" = ?,
+    "reviewLapses" = ?,
+    "reviewIntervalDays" = ?,
+    "reviewEaseFactor" = ?,
+    "reviewState" = ?,
+    "updatedAt" = ?
+WHERE "visitorId" = ? AND "wordId" = ?
+`;
+
 export interface GameSessionRow {
   id: string;
   visitorId: string;
@@ -217,33 +249,8 @@ export class SqliteGameSessionRepository {
   }
 
   async create(session: GameSession): Promise<void> {
-    if (session.mode !== STORED_MODE) {
-      throw new InvalidGameSessionError(`Only ${STORED_MODE} sessions are stored here.`);
-    }
-    const snapshot = session.toSnapshot();
     await this.runInTransaction(async () => {
-      await this.executor.run(INSERT_SESSION, [
-        snapshot.id,
-        snapshot.visitorId,
-        snapshot.status,
-        snapshot.targetWords,
-        session.correctAnswers,
-        session.wrongAnswers,
-        snapshot.startedAt.toISOString(),
-        toStoredInstant(snapshot.finishedAt),
-        session.result?.durationMs ?? null,
-        snapshot.mode,
-      ]);
-      for (const entry of snapshot.words) {
-        await this.executor.run(INSERT_SESSION_WORD, [
-          snapshot.id,
-          entry.word.id,
-          entry.sequence,
-          toStoredInstant(entry.presentedAt),
-          toStoredInstant(entry.completedAt),
-          entry.graded ? 1 : 0,
-        ]);
-      }
+      await insertGameSession(this.executor, session);
     });
   }
 
@@ -287,6 +294,7 @@ export class SqliteGameSessionRepository {
         return;
       }
       await this.storeProgress(session.visitorId, result);
+      await this.storeMatchingSchedule(session, result);
       await this.storeAnswer(session.id, storedAttempts, result);
       await this.storeSessionState(session);
     });
@@ -368,6 +376,25 @@ export class SqliteGameSessionRepository {
     await this.executor.run(COUNT_EXPOSURE, [session.visitorId, exposure.wordId, presentedAt]);
   }
 
+  private async storeMatchingSchedule(session: GameSession, result: AttemptResult): Promise<void> {
+    const wordId = result.attempt.promptWordId;
+    if (!session.gradesWord(wordId)) {
+      return;
+    }
+    const timeZone = await readReviewTimeZone(this.executor, session.id);
+    const current = await readMatchingSchedule(this.executor, session.visitorId, wordId);
+    const nextSchedule = scheduleMatchingAttempt({ session, result, current, timeZone });
+    if (nextSchedule === null) {
+      return;
+    }
+    await writeMatchingSchedule(this.executor, {
+      visitorId: session.visitorId,
+      wordId,
+      reviewedAt: result.attempt.occurredAt,
+      schedule: nextSchedule,
+    });
+  }
+
   private async storeProgress(visitorId: string, result: AttemptResult): Promise<void> {
     const wordId = result.attempt.promptWordId;
     const current = await this.readProgress(visitorId, wordId);
@@ -423,6 +450,57 @@ export class SqliteGameSessionRepository {
       toStoredInstant(session.finishedAt),
       session.result?.durationMs ?? null,
       session.id,
+    ]);
+  }
+}
+
+export interface MatchingAttemptSchedule {
+  readonly session: GameSession;
+  readonly result: AttemptResult;
+  readonly current: ReviewSchedule | null;
+  readonly timeZone: string;
+}
+
+export function scheduleMatchingAttempt(input: MatchingAttemptSchedule): ReviewSchedule | null {
+  const wordId = input.result.attempt.promptWordId;
+  if (!input.session.gradesWord(wordId)) {
+    return null;
+  }
+  const attemptId = input.result.attempt.attemptId;
+  const previousAttempts = input.session.attempts.filter(
+    (attempt) => attempt.attemptId !== attemptId,
+  );
+  return applyMatchingReview({
+    current: input.current,
+    previousAttempts,
+    result: input.result,
+    timeZone: input.timeZone,
+  });
+}
+
+export async function insertGameSession(executor: SqlExecutor, session: GameSession): Promise<void> {
+  assertStoredMode(session.mode);
+  const snapshot = session.toSnapshot();
+  await executor.run(INSERT_SESSION, [
+    snapshot.id,
+    snapshot.visitorId,
+    snapshot.status,
+    snapshot.targetWords,
+    session.correctAnswers,
+    session.wrongAnswers,
+    snapshot.startedAt.toISOString(),
+    toStoredInstant(snapshot.finishedAt),
+    session.result?.durationMs ?? null,
+    snapshot.mode,
+  ]);
+  for (const entry of snapshot.words) {
+    await executor.run(INSERT_SESSION_WORD, [
+      snapshot.id,
+      entry.word.id,
+      entry.sequence,
+      toStoredInstant(entry.presentedAt),
+      toStoredInstant(entry.completedAt),
+      entry.graded ? 1 : 0,
     ]);
   }
 }
@@ -483,6 +561,63 @@ export function toSessionReviewFacts(
       })),
     progressByWordId,
   };
+}
+
+interface MatchingScheduleWrite {
+  readonly visitorId: string;
+  readonly wordId: string;
+  readonly reviewedAt: Date;
+  readonly schedule: ReviewSchedule;
+}
+
+async function readReviewTimeZone(executor: SqlExecutor, gameSessionId: string): Promise<string> {
+  const rows = await executor.getAll<{ timeZone: string | null }>(SELECT_REVIEW_TIME_ZONE, [
+    gameSessionId,
+  ]);
+  const timeZone = rows[0]?.timeZone;
+  if (timeZone === undefined || timeZone === null || timeZone.length === 0) {
+    throw new InvalidGameSessionError("A review game needs the review session time zone.");
+  }
+  return timeZone;
+}
+
+async function readMatchingSchedule(
+  executor: SqlExecutor,
+  visitorId: string,
+  wordId: string,
+): Promise<ReviewSchedule | null> {
+  const rows = await executor.getAll<ReviewScheduleRow>(SELECT_MATCHING_SCHEDULE, [
+    visitorId,
+    wordId,
+  ]);
+  const row = rows[0];
+  return row === undefined ? null : toReviewScheduleFromRow(row);
+}
+
+async function writeMatchingSchedule(
+  executor: SqlExecutor,
+  input: MatchingScheduleWrite,
+): Promise<void> {
+  const stored = toSchedulePersistence(input.schedule);
+  const reviewedAt = input.reviewedAt.toISOString();
+  await executor.run(UPDATE_MATCHING_SCHEDULE, [
+    reviewedAt,
+    stored.nextReviewAt,
+    stored.reviewRepetitions,
+    stored.reviewLapses,
+    stored.reviewIntervalDays,
+    stored.reviewEaseFactor,
+    stored.reviewState,
+    reviewedAt,
+    input.visitorId,
+    input.wordId,
+  ]);
+}
+
+function assertStoredMode(mode: GameSessionMode): void {
+  if (mode !== "FREE" && mode !== "REVIEW") {
+    throw new InvalidGameSessionError("Only FREE and REVIEW sessions are stored here.");
+  }
 }
 
 function toGameSession(rows: StoredGameSessionRows): GameSession {

@@ -9,6 +9,7 @@ import { describe, expect, it } from "vitest";
 const projectRoot = fileURLToPath(new URL("../../../..", import.meta.url));
 const sourceRoot = path.join(projectRoot, "src");
 const RULE_DIRECTORIES = ["lib/domain", "lib/application"] as const;
+const PURE_DEPENDENCIES = new Set(["fastest-levenshtein"]);
 
 const COPIED_GAME_RULES = [
   "lib/domain/game/game-engine.ts",
@@ -34,6 +35,13 @@ describe("game rule boundary", () => {
     expect(outsideRules(file, "./errors")).toBe(false);
     expect(outsideRules(file, "@/lib/domain/learning/types")).toBe(false);
     expect(outsideRules(file, "@/lib/application/game/session-view")).toBe(false);
+    expect(outsideRules(file, "fastest-levenshtein")).toBe(true);
+    expect(
+      outsideRules(
+        path.join(sourceRoot, "lib/domain/learning/typing-answer.ts"),
+        "fastest-levenshtein",
+      ),
+    ).toBe(false);
   });
 
   it("keeps every copied game rule inside domain and application", () => {
@@ -60,6 +68,9 @@ function importsOutsideRules(file: string): string[] {
 }
 
 function outsideRules(file: string, specifier: string): boolean {
+  if (PURE_DEPENDENCIES.has(specifier) && file.endsWith(`${path.sep}typing-answer.ts`)) {
+    return false;
+  }
   if (specifier.startsWith("@/")) {
     return !insideRules(path.join(sourceRoot, specifier.slice(2)));
   }

@@ -3,7 +3,12 @@ import { AccessibilityInfo, Animated, Pressable, StyleSheet, Text, View } from "
 
 import type { GameCard } from "@/lib/domain/game/game-engine";
 import type { RandomSource, Word } from "@/lib/domain/game/types";
-import { HOME_ENTRY_METRICS, HOME_ENTRY_PALETTE } from "@/lib/presentation/home/home-entry-layout";
+import {
+  PAR_A_PAR_COLORS,
+  PAR_A_PAR_FONTS,
+  PAR_A_PAR_METRICS,
+  hardShadow,
+} from "@/lib/presentation/theme/par-a-par-theme";
 import {
   PAIR_BOARD_CARD_HINT,
   PAIR_BOARD_COLUMN_TITLES,
@@ -44,8 +49,6 @@ export interface PairBoardProps {
 }
 
 const LANGUAGES: readonly PairBoardLanguage[] = ["portuguese", "english"];
-const CARD_BORDER_WIDTH = 1;
-const SELECTED_BORDER_WIDTH = 3;
 const CARD_TEXT_LINES = 2;
 const CARD_MIN_FONT_SCALE = 0.7;
 
@@ -202,6 +205,8 @@ function PairCard({
 }) {
   const view = pairBoardCardView(state, card);
   const opacity = useEnterOpacity(reduceMotion);
+  // A function `style` is dropped on Android, where NativeWind wraps Pressable: keep it static.
+  const [pressed, setPressed] = useState(false);
   return (
     <Animated.View style={[styles.cardSlot, { opacity }]}>
       <Pressable
@@ -211,7 +216,14 @@ function PairCard({
         accessibilityState={{ selected: view.selected, disabled: view.disabled }}
         disabled={view.disabled}
         onPress={() => onSelect(card.wordId)}
-        style={[styles.card, CARD_STATUS_STYLES[view.status]]}
+        onPressIn={() => setPressed(true)}
+        onPressOut={() => setPressed(false)}
+        style={[
+          styles.card,
+          card.language === "english" ? styles.cardEnglish : styles.cardPortuguese,
+          CARD_STATUS_STYLES[view.status],
+          pressed && !view.disabled ? styles.cardPressed : null,
+        ]}
       >
         {view.status === "incorrect" ? <Text style={styles.cardMissIcon}>✕</Text> : null}
         <Text
@@ -245,110 +257,136 @@ function useEnterOpacity(reduceMotion: boolean): Animated.Value {
   return opacity;
 }
 
+const TILE_GAP = 10;
+const DISABLED_OPACITY = 0.6;
+
 const styles = StyleSheet.create({
   board: {
     flex: 1,
-    gap: HOME_ENTRY_METRICS.actionGap,
+    // Cards sit at the bottom, within reach of the thumb; the feedback stays right above them.
+    justifyContent: "flex-end",
+    gap: 16,
   },
   feedback: {
     minHeight: PAIR_BOARD_MIN_TOUCH_TARGET,
     flexDirection: "row",
     alignItems: "center",
-    gap: HOME_ENTRY_METRICS.actionGap,
-    paddingHorizontal: HOME_ENTRY_METRICS.cardPadding,
-    borderRadius: HOME_ENTRY_METRICS.actionRadius,
+    gap: TILE_GAP,
+    paddingHorizontal: 14,
+    borderRadius: PAR_A_PAR_METRICS.tileRadius,
     borderCurve: "continuous",
-    borderWidth: CARD_BORDER_WIDTH,
+    borderWidth: PAR_A_PAR_METRICS.tileBorder,
     borderColor: "transparent",
   },
   toneCorrect: {
-    color: HOME_ENTRY_PALETTE.primary,
+    color: PAR_A_PAR_COLORS.primary,
   },
   toneIncorrect: {
-    color: HOME_ENTRY_PALETTE.emphasis,
+    color: PAR_A_PAR_COLORS.error,
   },
   feedbackCorrect: {
-    borderColor: HOME_ENTRY_PALETTE.primary,
-    backgroundColor: HOME_ENTRY_PALETTE.card,
+    borderColor: PAR_A_PAR_COLORS.ink,
+    backgroundColor: PAR_A_PAR_COLORS.englishTile,
+    boxShadow: hardShadow(),
   },
   feedbackIncorrect: {
-    borderColor: HOME_ENTRY_PALETTE.emphasis,
-    backgroundColor: HOME_ENTRY_PALETTE.card,
+    borderColor: PAR_A_PAR_COLORS.error,
+    borderStyle: "dashed",
+    backgroundColor: PAR_A_PAR_COLORS.errorTile,
   },
   feedbackIcon: {
-    fontSize: HOME_ENTRY_METRICS.summarySize,
-    fontWeight: "700",
+    fontFamily: PAR_A_PAR_FONTS.display,
+    fontSize: 20,
   },
   feedbackText: {
     flexShrink: 1,
-    color: HOME_ENTRY_PALETTE.ink,
-    fontSize: HOME_ENTRY_METRICS.introSize,
+    color: PAR_A_PAR_COLORS.ink,
+    fontFamily: PAR_A_PAR_FONTS.body,
+    fontSize: 16,
   },
   feedbackTitle: {
-    fontWeight: "700",
+    fontFamily: PAR_A_PAR_FONTS.bodyHeavy,
   },
   columns: {
-    flex: 1,
+    flexShrink: 1,
     flexDirection: "row",
-    gap: HOME_ENTRY_METRICS.actionGap,
+    gap: 14,
   },
   column: {
     flex: 1,
+    flexShrink: 1,
     minWidth: 0,
-    gap: HOME_ENTRY_METRICS.actionGap,
+    gap: TILE_GAP,
   },
   columnTitle: {
-    color: HOME_ENTRY_PALETTE.muted,
-    fontSize: HOME_ENTRY_METRICS.badgeSize,
-    fontWeight: "700",
-    letterSpacing: HOME_ENTRY_METRICS.badgeLetterSpacing,
+    color: PAR_A_PAR_COLORS.inkMuted,
+    fontFamily: PAR_A_PAR_FONTS.bodyHeavy,
+    fontSize: PAR_A_PAR_METRICS.eyebrowSize,
+    letterSpacing: PAR_A_PAR_METRICS.eyebrowSpacing,
     textTransform: "uppercase",
   },
   cardSlot: {
-    flex: 1,
-    minHeight: PAIR_BOARD_MIN_TOUCH_TARGET,
+    height: PAR_A_PAR_METRICS.tileHeight,
+    minHeight: PAR_A_PAR_METRICS.tileMinHeight,
+    flexShrink: 1,
   },
   card: {
     flex: 1,
-    minHeight: PAIR_BOARD_MIN_TOUCH_TARGET,
+    minHeight: PAR_A_PAR_METRICS.tileMinHeight,
     minWidth: PAIR_BOARD_MIN_TOUCH_TARGET,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: HOME_ENTRY_METRICS.actionGap,
-    paddingHorizontal: HOME_ENTRY_METRICS.actionGap,
-    borderRadius: HOME_ENTRY_METRICS.actionRadius,
+    gap: 8,
+    paddingHorizontal: 10,
+    borderRadius: PAR_A_PAR_METRICS.tileRadius,
     borderCurve: "continuous",
-    borderWidth: CARD_BORDER_WIDTH,
-    borderColor: HOME_ENTRY_PALETTE.cardBorder,
-    backgroundColor: HOME_ENTRY_PALETTE.card,
+    borderWidth: PAR_A_PAR_METRICS.tileBorder,
+    borderColor: PAR_A_PAR_COLORS.ink,
+    boxShadow: hardShadow(),
+  },
+  cardPortuguese: {
+    backgroundColor: PAR_A_PAR_COLORS.portugueseTile,
+  },
+  cardEnglish: {
+    backgroundColor: PAR_A_PAR_COLORS.englishTile,
+  },
+  cardPressed: {
+    boxShadow: hardShadow(1),
+    transform: [{ translateX: 2 }, { translateY: 2 }],
   },
   cardSelected: {
-    borderWidth: SELECTED_BORDER_WIDTH,
-    borderColor: HOME_ENTRY_PALETTE.primary,
-    backgroundColor: HOME_ENTRY_PALETTE.secondary,
+    outlineWidth: PAR_A_PAR_METRICS.focusRing,
+    outlineStyle: "solid",
+    outlineColor: PAR_A_PAR_COLORS.ring,
+    outlineOffset: 2,
+    boxShadow: hardShadow(PAR_A_PAR_METRICS.selectedShadow),
+    transform: [{ translateX: -1 }, { translateY: -1 }],
   },
   cardIncorrect: {
-    borderWidth: SELECTED_BORDER_WIDTH,
-    borderColor: HOME_ENTRY_PALETTE.emphasis,
+    backgroundColor: PAR_A_PAR_COLORS.errorTile,
+    outlineWidth: PAR_A_PAR_METRICS.focusRing,
+    outlineStyle: "dashed",
+    outlineColor: PAR_A_PAR_COLORS.error,
+    outlineOffset: 2,
   },
   cardDisabled: {
-    opacity: 0.5,
+    opacity: DISABLED_OPACITY,
   },
   cardText: {
     flexShrink: 1,
-    color: HOME_ENTRY_PALETTE.ink,
-    fontSize: HOME_ENTRY_METRICS.summarySize,
-    fontWeight: "600",
+    color: PAR_A_PAR_COLORS.ink,
+    fontFamily: PAR_A_PAR_FONTS.displayBold,
+    fontSize: 20,
     textAlign: "center",
   },
   cardTextSelected: {
-    fontWeight: "800",
+    fontFamily: PAR_A_PAR_FONTS.display,
   },
   cardMissIcon: {
-    color: HOME_ENTRY_PALETTE.emphasis,
-    fontSize: HOME_ENTRY_METRICS.summarySize,
-    fontWeight: "700",
+    color: PAR_A_PAR_COLORS.error,
+    fontFamily: PAR_A_PAR_FONTS.display,
+    fontSize: 18,
   },
 });
 

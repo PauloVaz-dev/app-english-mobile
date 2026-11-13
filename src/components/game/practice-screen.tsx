@@ -4,7 +4,11 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AccessibilityInfo, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { LogOut } from "lucide-react-native";
+
 import { PairBoard } from "@/components/game/pair-board";
+import { BrandLockup } from "@/components/theme/brand-lockup";
+import { PaperBackground } from "@/components/theme/paper-background";
 import {
   createInstalledPracticePort,
   createPracticeAttemptId,
@@ -30,11 +34,18 @@ import {
   type PracticeScreenState,
 } from "@/lib/presentation/game/practice-screen";
 import { HOME_ENTRY_METRICS, HOME_ENTRY_PALETTE } from "@/lib/presentation/home/home-entry-layout";
+import {
+  PAR_A_PAR_COLORS,
+  PAR_A_PAR_FONTS,
+  PAR_A_PAR_METRICS,
+} from "@/lib/presentation/theme/par-a-par-theme";
 
 const CLOCK_REDRAW_MS = 250;
 const CARD_BORDER_WIDTH = 1;
 const MATCH_GAP = 8;
-const CLOCK_SIZE = 28;
+const BOARD_BOTTOM_GAP = 20;
+const CLOCK_SIZE = 26;
+const ICON_SIZE = 20;
 
 export function PracticeScreen() {
   const { state, controller } = usePracticeScreen();
@@ -149,29 +160,35 @@ function PracticeMatch({
       style={[
         styles.screen,
         styles.match,
-        { paddingTop: insets.top + MATCH_GAP, paddingBottom: insets.bottom + MATCH_GAP },
+        { paddingTop: insets.top + MATCH_GAP, paddingBottom: insets.bottom + BOARD_BOTTOM_GAP },
       ]}
     >
+      <PaperBackground />
       <StatusBar style="dark" />
       <View style={styles.header}>
         <View style={styles.headerRow}>
-          <HomeAction action={PRACTICE_INTRO.leave} />
-          <Text accessibilityLabel={header.clock.accessibilityLabel} style={styles.clock}>
-            {header.clock.label}
-          </Text>
+          <BrandLockup />
+          <View style={styles.headerActions}>
+            <Text accessibilityLabel={header.clock.accessibilityLabel} style={styles.clock}>
+              {header.clock.label}
+            </Text>
+            <LeaveIconAction action={PRACTICE_INTRO.leave} />
+          </View>
         </View>
-        <View style={styles.headerRow}>
-          {header.stats.map((stat) => (
-            <View
-              key={stat.label}
-              accessible
-              accessibilityLabel={stat.accessibilityLabel}
-              style={styles.stat}
-            >
-              <Text style={styles.statValue}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
-            </View>
-          ))}
+        <View style={styles.progressBlock}>
+          <View style={styles.headerRow}>
+            <Text accessibilityLabel={header.progress.accessibilityLabel} style={styles.eyebrow}>
+              {header.progress.label}
+            </Text>
+            <Text style={styles.eyebrow}>{header.scoreLine}</Text>
+          </View>
+          <View
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+            style={styles.progressTrack}
+          >
+            <View style={[styles.progressFill, { width: `${header.progress.ratio * 100}%` }]} />
+          </View>
         </View>
       </View>
       {match.halted ? <PersistFailure onRetry={() => void controller.retry()} /> : null}
@@ -310,6 +327,21 @@ function PrimaryAction({ action, onPress }: { action: PracticeAction; onPress: (
   );
 }
 
+function LeaveIconAction({ action }: { action: PracticeAction }) {
+  return (
+    <Link href="/" dismissTo asChild>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={action.accessibilityLabel}
+        hitSlop={4}
+        style={styles.iconTarget}
+      >
+        <LogOut color={PAR_A_PAR_COLORS.ink} size={ICON_SIZE} strokeWidth={2.2} />
+      </Pressable>
+    </Link>
+  );
+}
+
 function HomeAction({ action }: { action: PracticeAction }) {
   return (
     <Link href="/" dismissTo asChild>
@@ -378,23 +410,51 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   header: {
-    gap: MATCH_GAP,
-    padding: MATCH_GAP,
-    borderRadius: HOME_ENTRY_METRICS.cardRadius,
+    gap: 14,
+    paddingBottom: 6,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  progressBlock: {
+    gap: 8,
+  },
+  eyebrow: {
+    color: PAR_A_PAR_COLORS.inkMuted,
+    fontFamily: PAR_A_PAR_FONTS.bodyHeavy,
+    fontSize: PAR_A_PAR_METRICS.eyebrowSize,
+    letterSpacing: PAR_A_PAR_METRICS.eyebrowSpacing,
+    textTransform: "uppercase",
+  },
+  progressTrack: {
+    height: PAR_A_PAR_METRICS.progressHeight,
+    overflow: "hidden",
+    borderRadius: PAR_A_PAR_METRICS.progressHeight,
+    backgroundColor: PAR_A_PAR_COLORS.track,
+  },
+  progressFill: {
+    height: "100%",
+    borderRadius: PAR_A_PAR_METRICS.progressHeight,
+    backgroundColor: PAR_A_PAR_COLORS.primary,
+  },
+  iconTarget: {
+    width: PRACTICE_MIN_TOUCH_TARGET,
+    height: PRACTICE_MIN_TOUCH_TARGET,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
     borderCurve: "continuous",
-    borderWidth: CARD_BORDER_WIDTH,
-    borderColor: HOME_ENTRY_PALETTE.cardBorder,
-    backgroundColor: HOME_ENTRY_PALETTE.card,
+    borderWidth: PAR_A_PAR_METRICS.tileBorder,
+    borderColor: PAR_A_PAR_COLORS.ink,
+    backgroundColor: PAR_A_PAR_COLORS.card,
   },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     gap: MATCH_GAP,
-  },
-  stat: {
-    flex: 1,
-    alignItems: "center",
   },
   statValue: {
     color: HOME_ENTRY_PALETTE.ink,
@@ -407,10 +467,11 @@ const styles = StyleSheet.create({
     fontSize: HOME_ENTRY_METRICS.cardLabelSize,
   },
   clock: {
-    color: HOME_ENTRY_PALETTE.ink,
+    color: PAR_A_PAR_COLORS.ink,
+    fontFamily: PAR_A_PAR_FONTS.display,
     fontSize: CLOCK_SIZE,
-    fontWeight: "700",
     fontVariant: ["tabular-nums"],
+    letterSpacing: -0.5,
   },
   boardArea: {
     flex: 1,

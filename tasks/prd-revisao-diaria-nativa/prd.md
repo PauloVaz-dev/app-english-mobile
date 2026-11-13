@@ -82,7 +82,7 @@ A tela pode ser reorganizada para o celular. A nota, o intervalo e o que entra n
 
 ### 5. Treino livre
 
-36. Sem vencidas e sem novas disponíveis, a entrada oferece treino livre: pareamento com palavras já estudadas.
+36. Sem vencidas e sem novas disponíveis, a entrada oferece treino livre: o pareamento de 20 palavras sorteadas entre todas as ativas, com peso maior para as difíceis. (Revisado em 2026-11-12, seguindo a decisão do jogo de pareamento; a versão anterior usava só palavras já estudadas.)
 37. O treino livre registra as respostas no histórico e nas estatísticas, e não altera estado, facilidade nem data da próxima revisão.
 
 ## Experiência do Usuário

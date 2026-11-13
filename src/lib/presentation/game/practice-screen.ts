@@ -155,6 +155,12 @@ export interface PracticeHeaderStat {
 export interface PracticeHeaderView {
   readonly clock: { readonly label: string; readonly accessibilityLabel: string };
   readonly stats: readonly PracticeHeaderStat[];
+  readonly progress: {
+    readonly label: string;
+    readonly ratio: number;
+    readonly accessibilityLabel: string;
+  };
+  readonly scoreLine: string;
   readonly boardDisabled: boolean;
 }
 
@@ -196,8 +202,22 @@ export function practiceHeaderView(match: PracticeMatchView, now: Date): Practic
         `${completed} de ${match.targetWords} palavras`,
       ),
     ],
+    progress: {
+      label: `Progresso ${completed}/${match.targetWords}`,
+      ratio: match.targetWords === 0 ? 0 : completed / match.targetWords,
+      accessibilityLabel: `Progresso: ${completed} de ${match.targetWords} palavras`,
+    },
+    scoreLine: `${countLabel(match.correctAnswers, "acerto", "acertos")} · ${countLabel(
+      match.wrongAnswers,
+      "erro",
+      "erros",
+    )}`,
     boardDisabled: match.halted || match.stoppedAt !== null,
   };
+}
+
+function countLabel(count: number, singular: string, plural: string): string {
+  return `${count} ${count === 1 ? singular : plural}`;
 }
 
 export function practiceResultView(outcome: PracticeOutcome): PracticeResultView {

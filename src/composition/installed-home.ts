@@ -42,9 +42,10 @@ export function createInstalledHomeEntry(
   resources: InstalledHomeResources = defaultInstalledHomeResources(),
 ): HomeEntry {
   const openDatabase = rememberDatabase(resources.openDatabase);
+  const loads = new HomeLoadQueue();
   return {
     load(now?: Date) {
-      return loadInstalledHome(resources, openDatabase, now);
+      return loads.run(() => loadInstalledHome(resources, openDatabase, now));
     },
     listen(reload: () => void) {
       return startHomeEntry({
@@ -66,6 +67,16 @@ function defaultInstalledHomeResources(): InstalledHomeResources {
     },
     recordEvent: recordHomeOpenFailure,
   };
+}
+
+class HomeLoadQueue {
+  private tail: Promise<unknown> = Promise.resolve();
+
+  run<T>(work: () => Promise<T>): Promise<T> {
+    const next = this.tail.then(work);
+    this.tail = next.catch(() => undefined);
+    return next;
+  }
 }
 
 function rememberDatabase(

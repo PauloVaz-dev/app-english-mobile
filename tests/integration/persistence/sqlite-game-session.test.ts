@@ -479,7 +479,7 @@ describe("sqlite game session repository", () => {
     });
   });
 
-  it("refuses unknown sessions, other modes and tampered counters", async () => {
+  it("refuses unknown sessions, classic mode and tampered counters", async () => {
     await withDatabaseFile(async (filePath) => {
       await createLearnerFile(filePath);
       await useFile(filePath, async (learner) => {
@@ -504,10 +504,31 @@ describe("sqlite game session repository", () => {
           { id: "session-review", visitorId: VISITOR_ID, words, mode: "REVIEW" },
           learner.clock,
         );
-        await expect(learner.repository.create(review)).rejects.toBeInstanceOf(
+        await learner.repository.create(review);
+        expect(readSessionRow(learner.database, review.id).mode).toBe("REVIEW");
+        expect(readGradedFlags(learner.database, review.id)).toEqual(Array(words.length).fill(1));
+        const classicWords = words.slice(0, 3);
+        const classic = GameSession.restore({
+          id: "session-classic",
+          visitorId: VISITOR_ID,
+          mode: "CLASSIC",
+          status: "ACTIVE",
+          targetWords: classicWords.length,
+          words: classicWords.map((word, sequence) => ({
+            word,
+            sequence,
+            presentedAt: null,
+            completedAt: null,
+            graded: true,
+          })),
+          attempts: [],
+          startedAt: learner.clock.now(),
+          finishedAt: null,
+        });
+        await expect(learner.repository.create(classic)).rejects.toBeInstanceOf(
           InvalidGameSessionError,
         );
-        expect(countSessions(learner.database)).toBe(0);
+        expect(countSessions(learner.database)).toBe(1);
         await startFreeSession(learner, "session-tampered");
         learner.database
           .prepare(`UPDATE "GameSession" SET "wrongAnswers" = 5 WHERE "id" = ?`)

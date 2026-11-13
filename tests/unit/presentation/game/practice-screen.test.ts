@@ -290,6 +290,25 @@ describe("practice screen controller with a fake composition", () => {
     ]);
   });
 
+  it("summarizes the progress bar and the score line of the header", async () => {
+    const port = new FakePracticePort();
+    const clock = { now: OPENED_AT };
+    const { controller } = controllerWith(port, clock);
+    await controller.start();
+    await controller.cardsReady(["w0", "w1", "w2", "w3", "w4"]);
+
+    void controller.attempt(miss(0));
+    void controller.attempt(hit(0));
+
+    const header = practiceHeaderView(match(controller), clock.now);
+    expect(header.progress).toEqual({
+      label: "Progresso 1/20",
+      ratio: 0.05,
+      accessibilityLabel: "Progresso: 1 de 20 palavras",
+    });
+    expect(header.scoreLine).toBe("1 acerto · 1 erro");
+  });
+
   it("starts the clock with the match and stops it at the 20th hit", async () => {
     const port = new FakePracticePort();
     port.resultFailure = new Error("hold the match on screen");

@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
+    "@expo-google-fonts/bricolage-grotesque": "^0.4.1",
+    "@expo-google-fonts/nunito-sans": "^0.4.2",
     "@expo/ui": "~58.0.28",
     "@rn-primitives/dialog": "^1.5.2",
     "@rn-primitives/portal": "^1.5.3",
@@ -28,6 +30,7 @@
     "expo-symbols": "~58.0.5",
     "expo-system-ui": "~58.0.7",
     "expo-web-browser": "~58.0.8",
+    "fastest-levenshtein": "^1.0.16",
     "lucide-react-native": "^1.72.0",
     "nativewind": "^4.2.7",
     "react": "19.3.0",

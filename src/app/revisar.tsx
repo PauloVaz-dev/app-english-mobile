@@ -1,5 +1,5 @@
-import { UnavailableActivity } from "@/components/home/unavailable-activity";
+import { ReviewScreen } from "@/components/review/review-screen";
 
-export default function ReviewUnavailableRoute() {
-  return <UnavailableActivity title="Revisão" />;
+export default function ReviewRoute() {
+  return <ReviewScreen />;
 }

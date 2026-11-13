@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { Link } from "expo-router";
+import { Link, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Pressable,
@@ -62,6 +62,11 @@ function useHomeEntry(): { status: HomeStatus; retry: () => void } {
     );
   }, [load]);
   useHomeForeground(listen, retry, attempt);
+  useFocusEffect(
+    useCallback(() => {
+      retry();
+    }, [retry]),
+  );
   return { status, retry };
 }
 
